@@ -1,4 +1,4 @@
-import { Geist, Geist_Mono } from "next/font/google"
+import { Caveat, Geist, Geist_Mono } from "next/font/google"
 
 import "./globals.css"
 import { SiteHeader } from "@/components/site-header"
@@ -10,6 +10,11 @@ const geist = Geist({ subsets: ["latin"], variable: "--font-sans" })
 const fontMono = Geist_Mono({
   subsets: ["latin"],
   variable: "--font-mono",
+})
+
+const caveat = Caveat({
+  subsets: ["latin"],
+  variable: "--font-caveat",
 })
 
 export default function RootLayout({
@@ -24,6 +29,7 @@ export default function RootLayout({
       className={cn(
         "antialiased",
         fontMono.variable,
+        caveat.variable,
         "font-sans",
         geist.variable
       )}

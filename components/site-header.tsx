@@ -4,6 +4,7 @@ import * as React from "react"
 import { Menu, Search, X } from "lucide-react"
 
 import { BrandLogo } from "@/components/brand-logo"
+import { ThemeToggle } from "@/components/theme-toggle"
 import { Button, buttonVariants } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 
@@ -17,7 +18,7 @@ const navItems = [
 
 const signInClassName = cn(
   buttonVariants({ variant: "outline" }),
-  "h-10 rounded-full border-brand-coral/40 bg-transparent px-5 text-sm font-semibold text-brand-navy shadow-none hover:bg-brand-coral/10 hover:text-brand-navy dark:bg-transparent dark:hover:bg-brand-coral/15"
+  "h-10 rounded-full border-brand-coral/40 bg-transparent px-5 text-sm font-semibold text-foreground shadow-none hover:bg-brand-coral/10 hover:text-foreground dark:bg-transparent dark:hover:bg-brand-coral/15"
 )
 
 const signUpClassName = cn(
@@ -31,7 +32,7 @@ export function SiteHeader() {
   return (
     <header className="sticky top-0 z-50 px-3 pt-3 sm:px-4 sm:pt-4">
       <div className="mx-auto max-w-6xl">
-        <div className="rounded-full border border-brand-navy/10 bg-brand-surface/95 px-3 py-2 shadow-[0_18px_40px_-24px_rgba(20,33,61,0.45)] backdrop-blur-md sm:px-5">
+        <div className="rounded-full border border-border bg-card/95 px-3 py-2 shadow-[0_18px_40px_-24px_rgba(20,33,61,0.45)] backdrop-blur-md sm:px-5">
           <div className="grid grid-cols-[auto_1fr] items-center gap-3 md:grid-cols-[auto_1fr_auto]">
             <BrandLogo />
 
@@ -50,8 +51,8 @@ export function SiteHeader() {
                     className={cn(
                       "group relative py-2 text-sm font-semibold transition-colors",
                       active
-                        ? "text-brand-navy"
-                        : "text-brand-navy/65 hover:text-brand-navy"
+                        ? "text-foreground"
+                        : "text-muted-foreground hover:text-foreground"
                     )}
                   >
                     {item.label}
@@ -69,12 +70,13 @@ export function SiteHeader() {
             </nav>
 
             <div className="flex items-center justify-end gap-1 sm:gap-2">
+              <ThemeToggle />
               <Button
                 type="button"
                 variant="ghost"
                 size="icon"
                 aria-label="Search"
-                className="size-10 rounded-full text-brand-navy hover:bg-brand-navy/5 hover:text-brand-navy"
+                className="size-10 rounded-full text-foreground hover:bg-foreground/5 hover:text-foreground"
               >
                 <Search className="size-[1.15rem]" />
               </Button>
@@ -100,7 +102,7 @@ export function SiteHeader() {
                 aria-expanded={menuOpen}
                 aria-controls="mobile-menu"
                 onClick={() => setMenuOpen((open) => !open)}
-                className="size-10 rounded-full text-brand-navy hover:bg-brand-navy/5 hover:text-brand-navy lg:hidden"
+                className="size-10 rounded-full text-foreground hover:bg-foreground/5 hover:text-foreground lg:hidden"
               >
                 {menuOpen ? (
                   <X className="size-5" />
@@ -115,7 +117,7 @@ export function SiteHeader() {
         {menuOpen ? (
           <div
             id="mobile-menu"
-            className="mt-2 rounded-3xl border border-brand-navy/10 bg-brand-surface p-3 shadow-xl lg:hidden"
+            className="mt-2 rounded-3xl border border-border bg-card p-3 shadow-xl lg:hidden"
           >
             <nav aria-label="Mobile" className="flex flex-col gap-1">
               {navItems.map((item) => {
@@ -130,8 +132,8 @@ export function SiteHeader() {
                     className={cn(
                       "rounded-2xl px-4 py-3 text-sm font-semibold transition-colors",
                       active
-                        ? "bg-brand-coral/10 text-brand-navy"
-                        : "text-brand-navy/70 hover:bg-brand-navy/5 hover:text-brand-navy"
+                        ? "bg-brand-coral/10 text-foreground"
+                        : "text-muted-foreground hover:bg-foreground/5 hover:text-foreground"
                     )}
                   >
                     {item.label}
@@ -140,7 +142,7 @@ export function SiteHeader() {
               })}
             </nav>
 
-            <div className="mt-3 grid grid-cols-2 gap-2 border-t border-brand-navy/10 pt-3">
+            <div className="mt-3 grid grid-cols-2 gap-2 border-t border-border pt-3">
               <a
                 href="#sign-in"
                 onClick={() => setMenuOpen(false)}
