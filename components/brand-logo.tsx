@@ -1,12 +1,21 @@
 import { cn } from "@/lib/utils"
 
-function BrandMark({ className }: { className?: string }) {
+function BrandMark({
+  className,
+  inverse = false,
+}: {
+  className?: string
+  inverse?: boolean
+}) {
   return (
     <svg
       viewBox="0 0 32 32"
       fill="none"
       aria-hidden="true"
-      className={cn("text-brand-navy dark:text-brand-cream", className)}
+      className={cn(
+        inverse ? "text-brand-cream" : "text-brand-navy dark:text-brand-cream",
+        className
+      )}
     >
       <path
         d="M28.56 14.56a1.3 1.3 0 0 0-.025-2.39l-11.17-5.09a2.6 2.6 0 0 0-2.16 0L4.03 12.17a1.3 1.3 0 0 0 0 2.38l11.17 5.09a2.6 2.6 0 0 0 2.16 0l11.2-5.08Z"
@@ -31,7 +40,13 @@ function BrandMark({ className }: { className?: string }) {
   )
 }
 
-export function BrandLogo({ className }: { className?: string }) {
+export function BrandLogo({
+  className,
+  inverse = false,
+}: {
+  className?: string
+  inverse?: boolean
+}) {
   return (
     <a
       href="#home"
@@ -41,8 +56,13 @@ export function BrandLogo({ className }: { className?: string }) {
         className
       )}
     >
-      <BrandMark className="size-9 shrink-0 sm:size-10" />
-      <span className="truncate text-xl font-extrabold tracking-tight text-brand-navy sm:text-2xl dark:text-brand-cream">
+      <BrandMark inverse={inverse} className="size-9 shrink-0 sm:size-10" />
+      <span
+        className={cn(
+          "truncate text-xl font-extrabold tracking-tight sm:text-2xl",
+          inverse ? "text-brand-cream" : "text-brand-navy dark:text-brand-cream"
+        )}
+      >
         Mentor<span className="text-brand-coral">Lagbe</span>
       </span>
     </a>
