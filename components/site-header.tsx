@@ -1,11 +1,23 @@
 "use client"
 
 import * as React from "react"
-import { Menu, Search, X } from "lucide-react"
+import { useRouter } from "next/navigation"
+import { ChevronDown, LogOut, Menu, Search, X } from "lucide-react"
 
 import { BrandLogo } from "@/components/brand-logo"
 import { ThemeToggle } from "@/components/theme-toggle"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button, buttonVariants } from "@/components/ui/button"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { signOut, useSession } from "@/lib/auth-client"
 import { cn } from "@/lib/utils"
 
 const navItems = [
@@ -27,7 +39,23 @@ const signUpClassName = cn(
 )
 
 export function SiteHeader() {
+  const router = useRouter()
   const [menuOpen, setMenuOpen] = React.useState(false)
+  const { data: session } = useSession()
+  const user = session?.user
+
+  const initials = (user?.name || user?.email || "ML")
+    .split(" ")
+    .map((part) => part[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase()
+
+  async function handleSignOut() {
+    setMenuOpen(false)
+    await signOut()
+    router.refresh()
+  }
 
   return (
     <header className="sticky top-0 z-50 px-3 pt-3 sm:px-4 sm:pt-4">
@@ -76,23 +104,75 @@ export function SiteHeader() {
                 variant="ghost"
                 size="icon"
                 aria-label="Search"
-                className="size-10 rounded-full text-foreground hover:bg-foreground/5 hover:text-foreground"
+                className="hidden size-10 rounded-full text-foreground hover:bg-foreground/5 hover:text-foreground sm:inline-flex"
               >
                 <Search className="size-[1.15rem]" />
               </Button>
 
-              <a
-                href="#sign-in"
-                className={cn(signInClassName, "hidden sm:inline-flex")}
-              >
-                Sign In
-              </a>
-              <a
-                href="#sign-up"
-                className={cn(signUpClassName, "hidden sm:inline-flex")}
-              >
-                Sign Up
-              </a>
+              {user ? (
+                <DropdownMenu>
+                  <DropdownMenuTrigger
+                    aria-label="Account menu"
+                    className="flex items-center gap-1 rounded-full p-0.5 outline-none focus-visible:ring-2 focus-visible:ring-brand-coral/60"
+                  >
+                    <Avatar className="size-9">
+                      {user.image ? (
+                        <AvatarImage src={user.image} alt={user.name} />
+                      ) : null}
+                      <AvatarFallback className="bg-brand-navy text-xs font-bold text-brand-cream">
+                        {initials}
+                      </AvatarFallback>
+                    </Avatar>
+                    <ChevronDown className="hidden size-3.5 text-muted-foreground sm:block" />
+                  </DropdownMenuTrigger>
+
+                  <DropdownMenuContent align="end" className="w-60">
+                    <DropdownMenuGroup>
+                      <DropdownMenuLabel>
+                        <p className="truncate text-sm font-semibold text-foreground">
+                          {user.name}
+                        </p>
+                        <p className="truncate text-xs font-normal">
+                          {user.email}
+                        </p>
+                      </DropdownMenuLabel>
+                    </DropdownMenuGroup>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuGroup>
+                      <DropdownMenuLabel className="flex items-center gap-1.5">
+                        <span className="rounded-full bg-brand-coral/10 px-2 py-0.5 text-[0.65rem] font-bold tracking-wide text-brand-coral-deep uppercase dark:text-brand-coral">
+                          {user.role ?? "student"}
+                        </span>
+                      </DropdownMenuLabel>
+                    </DropdownMenuGroup>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem
+                      variant="destructive"
+                      onClick={handleSignOut}
+                    >
+                      <LogOut />
+                      Sign out
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              ) : null}
+
+              {!user ? (
+                <>
+                  <a
+                    href="/login"
+                    className={cn(signInClassName, "hidden sm:inline-flex")}
+                  >
+                    Sign In
+                  </a>
+                  <a
+                    href="/register"
+                    className={cn(signUpClassName, "hidden sm:inline-flex")}
+                  >
+                    Sign Up
+                  </a>
+                </>
+              ) : null}
 
               <Button
                 type="button"
@@ -142,22 +222,51 @@ export function SiteHeader() {
               })}
             </nav>
 
-            <div className="mt-3 grid grid-cols-2 gap-2 border-t border-border pt-3">
-              <a
-                href="#sign-in"
-                onClick={() => setMenuOpen(false)}
-                className={cn(signInClassName, "w-full")}
-              >
-                Sign In
-              </a>
-              <a
-                href="#sign-up"
-                onClick={() => setMenuOpen(false)}
-                className={cn(signUpClassName, "w-full")}
-              >
-                Sign Up
-              </a>
-            </div>
+            {user ? (
+              <div className="mt-3 flex items-center gap-2 border-t border-border pt-3">
+                <Avatar className="size-9">
+                  {user.image ? (
+                    <AvatarImage src={user.image} alt={user.name} />
+                  ) : null}
+                  <AvatarFallback className="bg-brand-navy text-xs font-bold text-brand-cream">
+                    {initials}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm font-semibold">{user.name}</p>
+                  <p className="truncate text-xs text-muted-foreground">
+                    {user.email}
+                  </p>
+                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={handleSignOut}
+                  className="rounded-full"
+                >
+                  <LogOut className="size-3.5" />
+                  Sign out
+                </Button>
+              </div>
+            ) : (
+              <div className="mt-3 grid grid-cols-2 gap-2 border-t border-border pt-3">
+                <a
+                  href="/login"
+                  onClick={() => setMenuOpen(false)}
+                  className={cn(signInClassName, "w-full")}
+                >
+                  Sign In
+                </a>
+                <a
+                  href="/register"
+                  onClick={() => setMenuOpen(false)}
+                  className={cn(signUpClassName, "w-full")}
+                >
+                  Sign Up
+                </a>
+              </div>
+            )}
           </div>
         ) : null}
       </div>
