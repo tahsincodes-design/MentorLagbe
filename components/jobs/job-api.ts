@@ -8,15 +8,6 @@ async function getAuthHeaders() {
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
   }
-
-  // TODO(API): replace this fallback with the token key used by your backend.
-  // Example: const token = localStorage.getItem("accessToken")
-  if (typeof window !== "undefined") {
-    const token =
-      localStorage.getItem("mentorlagbe_token") ?? localStorage.getItem("token")
-    if (token) headers.Authorization = `Bearer ${token}`
-  }
-
   return headers
 }
 
@@ -35,7 +26,7 @@ async function readResponse<T>(response: Response): Promise<T> {
 }
 
 export async function fetchJobs(): Promise<Job[]> {
-  const response = await fetch(`${API_BASE_URL}/jobs`, {
+  const response = await fetch("/api/jobs", {
     method: "GET",
     cache: "no-store",
   })
@@ -45,7 +36,7 @@ export async function fetchJobs(): Promise<Job[]> {
 
 export async function createJob(payload: JobPayload): Promise<Job> {
   const headers = await getAuthHeaders()
-  const response = await fetch(`${API_BASE_URL}/jobs`, {
+  const response = await fetch("/api/jobs", {
     method: "POST",
     headers,
     body: JSON.stringify(payload),

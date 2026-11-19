@@ -77,7 +77,7 @@ export function JobsSidebar({
   }
 
   return (
-    <aside className="hidden w-56 shrink-0 border-r border-brand-navy/10 bg-brand-navy py-5 text-brand-cream lg:flex lg:min-h-[calc(100svh-5rem)] lg:flex-col">
+    <aside className="mx-5 mt-5 hidden w-56 shrink-0 rounded-2xl border-r border-brand-navy/10 bg-brand-navy py-5 text-brand-cream lg:flex lg:min-h-[calc(100svh-5rem)] lg:flex-col">
       <div className="flex flex-col items-center px-4">
         <Avatar className="size-16 ring-2 ring-brand-cream/15">
           {image ? <AvatarImage src={image} alt={name} /> : null}
