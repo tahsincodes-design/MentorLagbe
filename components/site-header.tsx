@@ -1,8 +1,9 @@
 "use client"
 
 import * as React from "react"
+import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { ChevronDown, LogOut, Menu, Search, X } from "lucide-react"
+import { ChevronDown, LogOut, Menu, Search, User, X } from "lucide-react"
 
 import { BrandLogo } from "@/components/brand-logo"
 import { ThemeToggle } from "@/components/theme-toggle"
@@ -146,6 +147,10 @@ export function SiteHeader() {
                       </DropdownMenuLabel>
                     </DropdownMenuGroup>
                     <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={() => router.push("/profile")}>
+                      <User />
+                      My Profile
+                    </DropdownMenuItem>
                     <DropdownMenuItem
                       variant="destructive"
                       onClick={handleSignOut}
@@ -238,16 +243,29 @@ export function SiteHeader() {
                     {user.email}
                   </p>
                 </div>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={handleSignOut}
-                  className="rounded-full"
-                >
-                  <LogOut className="size-3.5" />
-                  Sign out
-                </Button>
+                <div className="flex items-center gap-1.5">
+                  <Link
+                    href="/profile"
+                    onClick={() => setMenuOpen(false)}
+                    className={cn(
+                      buttonVariants({ variant: "outline", size: "sm" }),
+                      "rounded-full"
+                    )}
+                  >
+                    <User className="size-3.5" />
+                    Profile
+                  </Link>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={handleSignOut}
+                    className="rounded-full"
+                  >
+                    <LogOut className="size-3.5" />
+                    Sign out
+                  </Button>
+                </div>
               </div>
             ) : (
               <div className="mt-3 grid grid-cols-2 gap-2 border-t border-border pt-3">

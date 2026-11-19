@@ -22,7 +22,7 @@ if (process.env.NODE_ENV !== "production") {
 }
 
 // The URI in .env has no database name, so pick it here.
-const db = client.db("mentor-lagbe")
+export const db = client.db("mentor-lagbe")
 
 export const auth = betterAuth({
   baseURL: process.env.BETTER_AUTH_URL?.trim(),
@@ -37,6 +37,16 @@ export const auth = betterAuth({
         type: "string",
         required: false,
         defaultValue: "student",
+        input: true,
+      },
+      bio: {
+        type: "string",
+        required: false,
+        input: true,
+      },
+      location: {
+        type: "string",
+        required: false,
         input: true,
       },
     },
