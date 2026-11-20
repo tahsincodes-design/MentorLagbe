@@ -14,14 +14,12 @@ export async function GET(request: NextRequest) {
 
     const userId = session.user.id
 
-    // TODO(API): replace "applications" with the actual collection name.
-    // Store application documents with fields: userId and status.
     const applications = db.collection("applications")
-    const totalApplied = await applications.countDocuments({ userId })
-    const accepted = await applications.countDocuments({
-      userId,
-      status: "accepted",
-    })
+    const studentEmail = session.user.email
+    const [totalApplied, accepted] = await Promise.all([
+      applications.countDocuments({ studentEmail }),
+      applications.countDocuments({ studentEmail, status: "accepted" }),
+    ])
 
     // TODO(API): replace "subscriptions" with the actual collection name.
     // Store subscription documents with fields: userId and plan.

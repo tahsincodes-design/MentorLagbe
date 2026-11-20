@@ -4,12 +4,12 @@ import type { Job } from "@/components/jobs/job-types"
 import { Badge } from "@/components/ui/badge"
 
 export function JobsMarquee({ jobs }: { jobs: Job[] }) {
-  const recentJobs = jobs.filter((job) => job.status !== "closed").slice(0, 8)
+  const recentJobs = jobs.slice(0, 8)
 
   if (!recentJobs.length) {
     return (
       <div className="overflow-hidden rounded-xl border border-brand-coral/20 bg-brand-coral/5 px-4 py-3 text-sm text-muted-foreground">
-        No recent jobs are available yet.
+        No approved tuitions are available yet.
       </div>
     )
   }

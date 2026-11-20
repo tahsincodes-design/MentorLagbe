@@ -5,9 +5,7 @@ import { usePathname, useRouter } from "next/navigation"
 import {
   BriefcaseBusiness,
   LayoutDashboard,
-  Settings,
   UserRound,
-  UsersRound,
   Plus,
   LogOut,
 } from "lucide-react"
@@ -16,6 +14,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { signOut } from "@/lib/auth-client"
 import { cn } from "@/lib/utils"
+import { isTutorRole } from "@/components/auth/roles"
 
 type JobsSidebarProps = {
   name?: string
@@ -36,42 +35,22 @@ export function JobsSidebar({
   const router = useRouter()
   const normalizedRole = role?.toLowerCase()
 
-  const items =
-    normalizedRole === "admin"
+  const isTutor = isTutorRole(normalizedRole)
+  const isAdmin = normalizedRole === "admin"
+  const items = [
+    { label: "Home", href: "/", icon: LayoutDashboard },
+    { label: "Browse tuitions", href: "/jobs/jobs", icon: BriefcaseBusiness },
+    ...(isTutor || isAdmin
       ? [
-          { label: "Dashboard", href: "/", icon: LayoutDashboard },
           {
-            label: "Manage Jobs",
+            label: isAdmin ? "Tuition approvals" : "My tuitions",
             href: "/jobs/add-jobs",
             icon: BriefcaseBusiness,
           },
-          { label: "Users", href: "/#users", icon: UsersRound },
-          { label: "Profile", href: "/profile", icon: UserRound },
-          { label: "Settings", href: "/#settings", icon: Settings },
         ]
-      : normalizedRole === "mentor"
-        ? [
-            { label: "Dashboard", href: "/", icon: LayoutDashboard },
-            {
-              label: "Browse Jobs",
-              href: "/jobs/jobs",
-              icon: BriefcaseBusiness,
-            },
-            { label: "Profile", href: "/profile", icon: UserRound },
-            { label: "Settings", href: "/#settings", icon: Settings },
-          ]
-        : [
-            { label: "Dashboard", href: "/", icon: LayoutDashboard },
-            {
-              label: normalizedRole === "student" ? "My Jobs" : "Browse Jobs",
-              href:
-                normalizedRole === "student" ? "/jobs/add-jobs" : "/jobs/jobs",
-              icon: BriefcaseBusiness,
-            },
-            { label: "Applications", href: "/#applications", icon: UsersRound },
-            { label: "Profile", href: "/profile", icon: UserRound },
-            { label: "Settings", href: "/#settings", icon: Settings },
-          ]
+      : []),
+    ...(role ? [{ label: "Profile", href: "/profile", icon: UserRound }] : []),
+  ]
 
   const initials = (name || email || "ML")
     .split(" ")
@@ -98,15 +77,18 @@ export function JobsSidebar({
         <span className="mt-1 rounded-full bg-brand-cream/10 px-3 py-1 text-[0.65rem] font-bold text-brand-coral">
           {normalizedRole === "admin"
             ? "Admin"
-            : normalizedRole === "mentor"
-              ? "Mentor"
+            : isTutor
+              ? "Tutor"
               : normalizedRole === "student"
                 ? "Student"
                 : "Guest"}
         </span>
       </div>
 
-      <nav className="mt-6 flex flex-1 flex-col gap-1 px-3" aria-label="Jobs">
+      <nav
+        className="mt-6 flex flex-1 flex-col gap-1 px-3"
+        aria-label="Tuitions"
+      >
         {items.map((item) => {
           const Icon = item.icon
           const active =
@@ -131,8 +113,7 @@ export function JobsSidebar({
         })}
       </nav>
 
-      {(normalizedRole === "student" || normalizedRole === "admin") &&
-      openAddJob ? (
+      {isTutor && openAddJob ? (
         <div className="px-3 pb-3">
           <Button
             type="button"
@@ -140,21 +121,23 @@ export function JobsSidebar({
             className="w-full rounded-xl bg-brand-coral text-white hover:bg-brand-coral-deep"
           >
             <Plus className="size-4" />
-            Post a Job
+            Post tuition
           </Button>
         </div>
       ) : null}
 
-      <div className="border-t border-brand-cream/10 px-3 pt-3">
-        <button
-          type="button"
-          onClick={handleSignOut}
-          className="flex h-10 w-full items-center gap-3 rounded-lg px-3 text-sm font-semibold text-brand-cream/70 hover:bg-brand-cream/10 hover:text-brand-cream"
-        >
-          <LogOut className="size-4" />
-          Sign Out
-        </button>
-      </div>
+      {role ? (
+        <div className="border-t border-brand-cream/10 px-3 pt-3">
+          <button
+            type="button"
+            onClick={handleSignOut}
+            className="flex h-10 w-full items-center gap-3 rounded-lg px-3 text-sm font-semibold text-brand-cream/70 hover:bg-brand-cream/10 hover:text-brand-cream"
+          >
+            <LogOut className="size-4" />
+            Sign Out
+          </button>
+        </div>
+      ) : null}
     </aside>
   )
 }

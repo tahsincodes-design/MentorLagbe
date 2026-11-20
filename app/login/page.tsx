@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation"
 import { ArrowRight, Eye, EyeOff, Loader2, Lock, Mail } from "lucide-react"
 
 import { AuthShell } from "@/components/auth/auth-shell"
-import { roles, type UserRole } from "@/components/auth/roles"
+import { isTutorRole, roles, type UserRole } from "@/components/auth/roles"
 import { SiteFooter } from "@/components/site-footer"
 import { Button } from "@/components/ui/button"
 import {
@@ -56,7 +56,11 @@ export default function LoginPage() {
       }
 
       const accountRole = result.data?.user?.role
-      if (accountRole && accountRole !== role) {
+      if (
+        accountRole &&
+        accountRole !== role &&
+        !(role === "mentor" && isTutorRole(accountRole))
+      ) {
         await signOut()
         const label =
           roles.find((item) => item.value === accountRole)?.label ?? accountRole

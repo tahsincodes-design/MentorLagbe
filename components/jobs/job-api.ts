@@ -1,8 +1,8 @@
 import type {
   ApplicationStatus,
+  ApprovalStatus,
   Job,
   JobPayload,
-  JobStatus,
 } from "@/components/jobs/job-types"
 
 async function request<T>(path: string, method = "GET", payload?: object) {
@@ -25,8 +25,10 @@ function jobPath(jobId: string) {
   return `/api/jobs/${encodeURIComponent(jobId)}`
 }
 
-export async function fetchJobs() {
-  const result = await request<{ data: Job[] }>("/api/jobs")
+export async function fetchJobs(view: "browse" | "manage" = "browse") {
+  const result = await request<{ data: Job[] }>(
+    view === "manage" ? "/api/jobs?view=manage" : "/api/jobs"
+  )
   return result.data
 }
 
@@ -40,8 +42,19 @@ export async function updateJob(jobId: string, payload: Partial<JobPayload>) {
   return result.data
 }
 
-export function setJobStatus(jobId: string, status: JobStatus) {
-  return updateJob(jobId, { status })
+export function setJobStatus(jobId: string, isActive: boolean) {
+  return updateJob(jobId, { isActive })
+}
+
+export function reviewTuition(
+  jobId: string,
+  revision: number,
+  approvalStatus: Exclude<ApprovalStatus, "pending">
+) {
+  return request(`${jobPath(jobId)}/approval`, "PATCH", {
+    approvalStatus,
+    revision,
+  })
 }
 
 export function deleteJob(jobId: string) {

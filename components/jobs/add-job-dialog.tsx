@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { ImagePlus, Loader2, Upload } from "lucide-react"
+import { Loader2, Upload } from "lucide-react"
 import { toast } from "sonner"
 
 import { createJob } from "@/components/jobs/job-api"
@@ -18,14 +18,6 @@ import {
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
-import { Switch } from "@/components/ui/switch"
 import { Textarea } from "@/components/ui/textarea"
 
 const emptyPayload: JobPayload = {
@@ -46,11 +38,13 @@ export function AddJobDialog({
   onCreated: () => void
 }) {
   const [payload, setPayload] = React.useState<JobPayload>(emptyPayload)
-  const [active, setActive] = React.useState(true)
   const [saving, setSaving] = React.useState(false)
   const [error, setError] = React.useState("")
 
-  function updateField(field: keyof JobPayload, value: string) {
+  function updateField(
+    field: Exclude<keyof JobPayload, "isActive">,
+    value: string
+  ) {
     setPayload((current) => ({ ...current, [field]: value }))
   }
 
@@ -59,7 +53,7 @@ export function AddJobDialog({
     setError("")
 
     if (!payload.title.trim() || !payload.description.trim()) {
-      setError("Job title and description are required.")
+      setError("Tuition title and description are required.")
       return
     }
 
@@ -69,18 +63,16 @@ export function AddJobDialog({
         ...payload,
         title: payload.title.trim(),
         description: payload.description.trim(),
-        status: active ? "open" : "closed",
       })
-      toast.success("Tuition posted successfully")
+      toast.success("Tuition submitted for approval")
       setPayload(emptyPayload)
-      setActive(true)
       onOpenChange(false)
       onCreated()
     } catch (submitError) {
       setError(
         submitError instanceof Error
           ? submitError.message
-          : "Could not post this job."
+          : "Could not post this tuition."
       )
     } finally {
       setSaving(false)
@@ -95,7 +87,7 @@ export function AddJobDialog({
             Post a Tuition
           </DialogTitle>
           <DialogDescription>
-            Share your tuition with students and mentors.
+            Students can find your tuition after an admin approves it.
           </DialogDescription>
         </DialogHeader>
 
@@ -105,6 +97,8 @@ export function AddJobDialog({
               <Label htmlFor="job-title">Tuition Title *</Label>
               <Input
                 id="job-title"
+                required
+                maxLength={160}
                 value={payload.title}
                 onChange={(event) => updateField("title", event.target.value)}
                 placeholder="e.g. Mathematics for HSC"
@@ -112,28 +106,13 @@ export function AddJobDialog({
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="job-subject">Subject</Label>
-              <Select
+              <Input
+                id="job-subject"
                 value={payload.subject}
-                onValueChange={(value) => updateField("subject", String(value))}
-              >
-                <SelectTrigger id="job-subject" className="h-10 w-full">
-                  <SelectValue placeholder="Select Subject" />
-                </SelectTrigger>
-                <SelectContent>
-                  {[
-                    "Mathematics",
-                    "Physics",
-                    "Programming",
-                    "English",
-                    "IELTS",
-                    "General",
-                  ].map((subject) => (
-                    <SelectItem key={subject} value={subject}>
-                      {subject}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                onChange={(event) => updateField("subject", event.target.value)}
+                maxLength={160}
+                placeholder="e.g. Physics"
+              />
             </div>
           </div>
 
@@ -143,11 +122,12 @@ export function AddJobDialog({
               id="job-description"
               rows={4}
               maxLength={1500}
+              required
               value={payload.description}
               onChange={(event) =>
                 updateField("description", event.target.value)
               }
-              placeholder="Describe what you need, schedule, and expectations..."
+              placeholder="Describe what you teach and when lessons take place."
             />
             <p className="text-right text-[0.65rem] text-muted-foreground">
               {payload.description.length}/1500
@@ -178,39 +158,6 @@ export function AddJobDialog({
                 placeholder="e.g. Dhanmondi, Dhaka"
               />
             </div>
-          </div>
-
-          <div className="rounded-xl border border-dashed border-border bg-muted/30 p-4">
-            <div className="flex items-center gap-3">
-              <span className="grid size-10 place-items-center rounded-lg bg-brand-coral/10 text-brand-coral">
-                {payload.title ? (
-                  <Upload className="size-5" />
-                ) : (
-                  <ImagePlus className="size-5" />
-                )}
-              </span>
-              <div>
-                <p className="text-sm font-semibold">Banner Image</p>
-                <p className="text-xs text-muted-foreground">
-                  Optional · PNG, JPG or JPEG, max 5MB
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div className="flex items-center justify-between rounded-xl border border-border px-4 py-3">
-            <div>
-              <Label htmlFor="new-job-active">Active Status</Label>
-              <p className="mt-1 text-xs text-muted-foreground">
-                Turn off to hide this tuition temporarily.
-              </p>
-            </div>
-            <Switch
-              id="new-job-active"
-              checked={active}
-              onCheckedChange={setActive}
-              className="data-checked:bg-brand-coral"
-            />
           </div>
 
           {error ? (

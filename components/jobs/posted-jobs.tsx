@@ -3,11 +3,11 @@
 import * as React from "react"
 import { Plus } from "lucide-react"
 
+import { isTutorRole } from "@/components/auth/roles"
 import { fetchJobs } from "@/components/jobs/job-api"
 import type { Job } from "@/components/jobs/job-types"
 import { AddJobDialog } from "@/components/jobs/add-job-dialog"
 import { JobCard } from "@/components/jobs/job-card"
-import { JobsMarquee } from "@/components/jobs/jobs-marquee"
 import { Button } from "@/components/ui/button"
 
 export function PostedJobs({
@@ -32,11 +32,13 @@ export function PostedJobs({
 
   const loadJobs = React.useCallback(async () => {
     try {
-      setJobs(await fetchJobs())
+      setJobs(await fetchJobs("manage"))
       setError("")
     } catch (loadError) {
       setError(
-        loadError instanceof Error ? loadError.message : "Could not load jobs."
+        loadError instanceof Error
+          ? loadError.message
+          : "Could not load tuitions."
       )
     } finally {
       setLoading(false)
@@ -48,14 +50,14 @@ export function PostedJobs({
 
     async function loadInitialJobs() {
       try {
-        const data = await fetchJobs()
+        const data = await fetchJobs("manage")
         if (active) setJobs(data)
       } catch (loadError) {
         if (active) {
           setError(
             loadError instanceof Error
               ? loadError.message
-              : "Could not load jobs."
+              : "Could not load tuitions."
           )
         }
       } finally {
@@ -70,8 +72,8 @@ export function PostedJobs({
   }, [])
 
   const normalizedRole = role.toLowerCase()
-  const canPost = normalizedRole === "student" || normalizedRole === "admin"
-  const visibleJobs = jobs.filter((job) => job.canManage)
+  const canPost = isTutorRole(normalizedRole)
+  const isAdmin = normalizedRole === "admin"
 
   return (
     <main className="min-w-0 flex-1 px-4 py-5 sm:px-6 lg:px-8">
@@ -82,12 +84,12 @@ export function PostedJobs({
               Tuition management
             </p>
             <h1 className="mt-2 text-2xl font-extrabold tracking-tight sm:text-3xl">
-              {normalizedRole === "admin"
-                ? "All Posted Jobs"
-                : "My Posted Jobs"}
+              {isAdmin ? "Tuition approvals" : "My tuitions"}
             </h1>
             <p className="mt-1 text-sm text-muted-foreground">
-              Review, update, activate or close your tuition posts.
+              {isAdmin
+                ? "Review tuition posts before students can apply."
+                : "Manage your tuitions and review student applications."}
             </p>
           </div>
           {canPost ? (
@@ -97,15 +99,11 @@ export function PostedJobs({
               className="rounded-xl bg-brand-coral px-5 text-white hover:bg-brand-coral-deep"
             >
               <Plus className="size-4" />
-              Add Job
+              Post tuition
             </Button>
           ) : null}
         </div>
       </section>
-
-      <div className="mt-5">
-        <JobsMarquee jobs={visibleJobs} />
-      </div>
 
       {loading ? (
         <div className="mt-5 grid gap-4 md:grid-cols-2">
@@ -120,9 +118,9 @@ export function PostedJobs({
         <div className="mt-5 rounded-2xl border border-destructive/20 bg-destructive/5 p-5 text-sm text-destructive">
           {error}
         </div>
-      ) : visibleJobs.length ? (
+      ) : jobs.length ? (
         <div className="mt-5 grid gap-4 md:grid-cols-2">
-          {visibleJobs.map((job) => (
+          {jobs.map((job) => (
             <JobCard
               key={job._id}
               job={job}
@@ -132,7 +130,7 @@ export function PostedJobs({
         </div>
       ) : (
         <div className="mt-5 rounded-2xl border border-border bg-card p-8 text-center">
-          <p className="font-bold">No posted jobs yet</p>
+          <p className="font-bold">No tuitions yet</p>
           {canPost ? (
             <Button
               type="button"
@@ -141,7 +139,7 @@ export function PostedJobs({
               className="mt-4 rounded-xl"
             >
               <Plus className="size-4" />
-              Add your first job
+              Post your first tuition
             </Button>
           ) : null}
         </div>

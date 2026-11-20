@@ -6,7 +6,7 @@ import { Pencil, Trash2, Users } from "lucide-react"
 import { toast } from "sonner"
 
 import { deleteJob, setJobStatus } from "@/components/jobs/job-api"
-import type { Job } from "@/components/jobs/job-types"
+import { approvalLabels, type Job } from "@/components/jobs/job-types"
 import { EditJobDialog } from "@/components/jobs/edit-job-dialog"
 import {
   AlertDialog,
@@ -34,7 +34,7 @@ export function JobCard({
   const [editOpen, setEditOpen] = React.useState(false)
   const [deleting, setDeleting] = React.useState(false)
   const [updatingStatus, setUpdatingStatus] = React.useState(false)
-  const isOpen = job.status !== "closed"
+  const isOpen = job.isActive
   const jobId = job._id
   const busy = deleting || updatingStatus
 
@@ -43,8 +43,8 @@ export function JobCard({
 
     setUpdatingStatus(true)
     try {
-      await setJobStatus(jobId, checked ? "open" : "closed")
-      toast.success(checked ? "Job activated" : "Job closed")
+      await setJobStatus(jobId, checked)
+      toast.success(checked ? "Tuition activated" : "Tuition paused")
       onChanged()
     } catch (statusError) {
       toast.error(
@@ -63,13 +63,13 @@ export function JobCard({
     setDeleting(true)
     try {
       await deleteJob(jobId)
-      toast.success("Job deleted")
+      toast.success("Tuition deleted")
       onChanged()
     } catch (deleteError) {
       toast.error(
         deleteError instanceof Error
           ? deleteError.message
-          : "Could not delete this job."
+          : "Could not delete this tuition."
       )
     } finally {
       setDeleting(false)
@@ -96,8 +96,13 @@ export function JobCard({
                       : "rounded-full bg-muted text-muted-foreground"
                   }
                 >
-                  {isOpen ? "Active" : "Closed"}
+                  {isOpen ? "Active" : "Paused"}
                 </Badge>
+                {job.canManage || job.canModerate ? (
+                  <Badge variant="outline">
+                    {approvalLabels[job.approvalStatus]}
+                  </Badge>
+                ) : null}
               </div>
               {job.subject ? (
                 <p className="mt-1 text-xs font-semibold text-brand-coral-deep">
@@ -116,7 +121,7 @@ export function JobCard({
                 {job.location ? <span>{job.location}</span> : null}
                 <span className="flex items-center gap-1">
                   <Users className="size-3.5" />
-                  {job.postedBy?.name ?? "Job Poster"}
+                  {job.postedBy?.name ?? "Tutor"}
                 </span>
               </div>
             </div>
@@ -130,7 +135,7 @@ export function JobCard({
               className: "mt-4",
             })}
           >
-            {job.canManage ? "View job and applicants" : "View job details"}
+            {job.canModerate ? "Review tuition" : "View tuition details"}
           </Link>
 
           {job.canManage ? (
@@ -175,7 +180,7 @@ export function JobCard({
                 </AlertDialogTrigger>
                 <AlertDialogContent>
                   <AlertDialogHeader>
-                    <AlertDialogTitle>Delete this job?</AlertDialogTitle>
+                    <AlertDialogTitle>Delete this tuition?</AlertDialogTitle>
                     <AlertDialogDescription>
                       This action cannot be undone.
                     </AlertDialogDescription>

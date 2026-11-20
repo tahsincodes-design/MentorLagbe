@@ -2,23 +2,22 @@
 
 import * as React from "react"
 import Link from "next/link"
-import { Plus, Search } from "lucide-react"
+import { Search } from "lucide-react"
 
+import { isTutorRole } from "@/components/auth/roles"
 import { fetchJobs } from "@/components/jobs/job-api"
 import type { Job } from "@/components/jobs/job-types"
 import { JobCard } from "@/components/jobs/job-card"
 import { JobsMarquee } from "@/components/jobs/jobs-marquee"
-import { AddJobDialog } from "@/components/jobs/add-job-dialog"
-import { Button, buttonVariants } from "@/components/ui/button"
+import { buttonVariants } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 
 export function JobsBrowser({ role }: { role?: string }) {
   const [jobs, setJobs] = React.useState<Job[]>([])
   const [search, setSearch] = React.useState("")
-  const [category, setCategory] = React.useState("All")
+  const [category, setCategory] = React.useState("")
   const [loading, setLoading] = React.useState(true)
   const [error, setError] = React.useState("")
-  const [addOpen, setAddOpen] = React.useState(false)
 
   const loadJobs = React.useCallback(async () => {
     try {
@@ -26,7 +25,9 @@ export function JobsBrowser({ role }: { role?: string }) {
       setError("")
     } catch (loadError) {
       setError(
-        loadError instanceof Error ? loadError.message : "Could not load jobs."
+        loadError instanceof Error
+          ? loadError.message
+          : "Could not load tuitions."
       )
     } finally {
       setLoading(false)
@@ -45,7 +46,7 @@ export function JobsBrowser({ role }: { role?: string }) {
           setError(
             loadError instanceof Error
               ? loadError.message
-              : "Could not load jobs."
+              : "Could not load tuitions."
           )
         }
       } finally {
@@ -60,17 +61,13 @@ export function JobsBrowser({ role }: { role?: string }) {
   }, [])
 
   const normalizedRole = role?.toLowerCase()
-  const canPost = normalizedRole === "student" || normalizedRole === "admin"
-
-  const categories = [
-    "All",
-    "Mathematics",
-    "Physics",
-    "Programming",
-    "English",
-    "IELTS",
-    "General",
-  ]
+  const hasDashboard = isTutorRole(normalizedRole) || normalizedRole === "admin"
+  const subjects = new Map(
+    jobs.flatMap(({ subject }) =>
+      subject ? [[subject.toLowerCase(), subject] as const] : []
+    )
+  )
+  const categories = [["", "All"] as const, ...subjects]
 
   const visibleJobs = jobs.filter((job) => {
     const matchesSearch =
@@ -79,8 +76,7 @@ export function JobsBrowser({ role }: { role?: string }) {
         .toLowerCase()
         .includes(search.toLowerCase())
     const matchesCategory =
-      category === "All" ||
-      (job.subject ?? "").toLowerCase() === category.toLowerCase()
+      !subjects.has(category) || (job.subject ?? "").toLowerCase() === category
     return matchesSearch && matchesCategory
   })
 
@@ -92,27 +88,19 @@ export function JobsBrowser({ role }: { role?: string }) {
             Find your next learning opportunity
           </p>
           <h1 className="mt-2 text-2xl font-extrabold tracking-tight text-brand-navy sm:text-3xl">
-            Explore Available Jobs
+            Browse tuitions
           </h1>
           <p className="mt-1 text-sm text-brand-navy/70">
-            Browse tuition requests and connect with the right learners.
+            Find a tuition that fits your learning goals.
           </p>
         </div>
-        {canPost ? (
+        {hasDashboard ? (
           <div className="mt-5 flex flex-wrap gap-2">
-            <Button
-              type="button"
-              onClick={() => setAddOpen(true)}
-              className="rounded-xl bg-brand-coral px-5 text-white hover:bg-brand-coral-deep"
-            >
-              <Plus className="size-4" />
-              Post a Job
-            </Button>
             <Link
               href="/jobs/add-jobs"
               className={buttonVariants({ variant: "outline" })}
             >
-              {normalizedRole === "admin" ? "Manage jobs" : "My jobs"}
+              {normalizedRole === "admin" ? "Tuition approvals" : "My tuitions"}
             </Link>
           </div>
         ) : null}
@@ -128,25 +116,29 @@ export function JobsBrowser({ role }: { role?: string }) {
           <Input
             value={search}
             onChange={(event) => setSearch(event.target.value)}
-            placeholder="Search jobs"
+            placeholder="Search tuitions"
+            aria-label="Search tuitions"
             className="h-10 rounded-xl pl-9"
           />
         </div>
       </div>
 
       <div className="mt-3 flex gap-2 overflow-x-auto pb-2">
-        {categories.map((item) => (
+        {categories.map(([value, label]) => (
           <button
-            key={item}
+            key={value}
             type="button"
-            onClick={() => setCategory(item)}
+            onClick={() => setCategory(value)}
+            aria-pressed={
+              category === value || (!value && !subjects.has(category))
+            }
             className={`shrink-0 rounded-full border px-4 py-2 text-xs font-bold transition-colors ${
-              category === item
+              category === value || (!value && !subjects.has(category))
                 ? "border-brand-coral bg-brand-coral text-white"
                 : "border-border bg-card text-muted-foreground hover:border-brand-coral/40 hover:text-foreground"
             }`}
           >
-            {item}
+            {label}
           </button>
         ))}
       </div>
@@ -176,20 +168,12 @@ export function JobsBrowser({ role }: { role?: string }) {
         </div>
       ) : (
         <div className="mt-5 rounded-2xl border border-border bg-card p-8 text-center">
-          <p className="font-bold">No jobs found</p>
+          <p className="font-bold">No tuitions found</p>
           <p className="mt-1 text-sm text-muted-foreground">
             Try another search or category.
           </p>
         </div>
       )}
-
-      {canPost ? (
-        <AddJobDialog
-          open={addOpen}
-          onOpenChange={setAddOpen}
-          onCreated={() => void loadJobs()}
-        />
-      ) : null}
     </main>
   )
 }

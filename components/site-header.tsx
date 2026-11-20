@@ -2,10 +2,11 @@
 
 import * as React from "react"
 import Link from "next/link"
-import { useRouter } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 import { ChevronDown, LogOut, Menu, Search, User, X } from "lucide-react"
 
 import { BrandLogo } from "@/components/brand-logo"
+import { isTutorRole } from "@/components/auth/roles"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button, buttonVariants } from "@/components/ui/button"
@@ -23,8 +24,7 @@ import { cn } from "@/lib/utils"
 
 const navItems = [
   { label: "Home", href: "#home" },
-  { label: "Browse Tuitions", href: "#browse-tuitions" },
-  { label: "Jobs", href: "/jobs/jobs" },
+  { label: "Browse Tuitions", href: "/jobs/jobs" },
   { label: "Pricing", href: "#pricing" },
   { label: "How It Works", href: "#how-it-works" },
   { label: "About", href: "#about" },
@@ -42,9 +42,29 @@ const signUpClassName = cn(
 
 export function SiteHeader() {
   const router = useRouter()
+  const pathname = usePathname()
   const [menuOpen, setMenuOpen] = React.useState(false)
   const { data: session } = useSession()
   const user = session?.user
+  const isAdmin = user?.role === "admin"
+  const navigation =
+    isAdmin || isTutorRole(user?.role)
+      ? [
+          ...navItems,
+          {
+            label: isAdmin ? "Tuition Approvals" : "My Tuitions",
+            href: "/jobs/add-jobs",
+          },
+        ]
+      : navItems
+
+  function isActive(href: string) {
+    return (
+      pathname === href ||
+      (href === "#home" && pathname === "/") ||
+      (href === "/jobs/jobs" && pathname.startsWith("/jobs/jobs/"))
+    )
+  }
 
   const initials = (user?.name || user?.email || "ML")
     .split(" ")
@@ -70,8 +90,8 @@ export function SiteHeader() {
               aria-label="Primary"
               className="hidden items-center justify-center gap-6 lg:flex xl:gap-8"
             >
-              {navItems.map((item) => {
-                const active = item.href === "#home"
+              {navigation.map((item) => {
+                const active = isActive(item.href)
 
                 return (
                   <a
@@ -206,8 +226,8 @@ export function SiteHeader() {
             className="mt-2 rounded-3xl border border-border bg-card p-3 shadow-xl lg:hidden"
           >
             <nav aria-label="Mobile" className="flex flex-col gap-1">
-              {navItems.map((item) => {
-                const active = item.href === "#home"
+              {navigation.map((item) => {
+                const active = isActive(item.href)
 
                 return (
                   <a

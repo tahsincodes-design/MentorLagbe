@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation"
 
 import { JobsSidebar } from "@/components/jobs/jobs-sidebar"
 import { PostedJobs } from "@/components/jobs/posted-jobs"
+import { isTutorRole } from "@/components/auth/roles"
 import { useSession } from "@/lib/auth-client"
 
 export default function AddJobsPage() {
@@ -20,7 +21,7 @@ export default function AddJobsPage() {
       return
     }
     const role = (user.role ?? "student").toLowerCase()
-    if (role !== "student" && role !== "admin") {
+    if (!isTutorRole(role) && role !== "admin") {
       router.replace("/jobs/jobs")
     }
   }, [isPending, user, router])
@@ -32,7 +33,7 @@ export default function AddJobsPage() {
   }
 
   const role = (user.role ?? "student").toLowerCase()
-  if (role !== "student" && role !== "admin") return null
+  if (!isTutorRole(role) && role !== "admin") return null
 
   return (
     <div className="mx-auto flex min-h-[calc(100svh-5rem)] max-w-[1180px] overflow-hidden border-x border-border bg-background">

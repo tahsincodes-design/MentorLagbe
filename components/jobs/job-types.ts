@@ -1,4 +1,10 @@
-export type JobStatus = "open" | "closed"
+export type ApprovalStatus = "pending" | "approved" | "rejected"
+
+export const approvalLabels: Record<ApprovalStatus, string> = {
+  pending: "Pending approval",
+  approved: "Approved",
+  rejected: "Rejected",
+}
 
 export type Job = {
   _id: string
@@ -7,12 +13,15 @@ export type Job = {
   subject?: string
   salary?: number | string | null
   location?: string
-  status?: JobStatus | string
+  approvalStatus: ApprovalStatus
+  isActive: boolean
+  revision: number
   createdAt?: string
   postedBy?: {
     name?: string
   }
-  canManage?: boolean
+  canManage: boolean
+  canModerate: boolean
 }
 
 export type JobPayload = {
@@ -21,7 +30,7 @@ export type JobPayload = {
   subject: string
   salary: string
   location: string
-  status?: JobStatus
+  isActive?: boolean
 }
 
 export type ApplicationStatus = "pending" | "accepted" | "rejected"

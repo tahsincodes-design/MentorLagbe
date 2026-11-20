@@ -143,7 +143,7 @@ export function JobApplications({
         </p>
       ) : closed ? (
         <p className="mt-3 text-sm text-muted-foreground">
-          This job is closed to applications.
+          This tuition is closed to applications.
         </p>
       ) : isPending ? (
         <p role="status" className="mt-3 text-sm text-muted-foreground">
@@ -156,9 +156,11 @@ export function JobApplications({
         >
           Sign in to apply
         </Link>
-      ) : session.user.role === "mentor" ? (
+      ) : (session.user.role ?? "student").toLowerCase() === "student" ? (
         <form onSubmit={submitApplication} className="mt-4 grid gap-3">
-          <Label htmlFor="application-message">Why are you a good fit?</Label>
+          <Label htmlFor="application-message">
+            What would you like to learn?
+          </Label>
           <Textarea
             id="application-message"
             rows={5}
@@ -173,7 +175,7 @@ export function JobApplications({
         </form>
       ) : (
         <p className="mt-3 text-sm text-muted-foreground">
-          Only mentors can apply.
+          Only students can apply.
         </p>
       )}
       {error ? (

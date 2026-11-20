@@ -5,8 +5,16 @@ function errorResponse(status: number, message: string) {
 }
 
 export async function forwardJobs(request: Request, path = "") {
-  return requestJobs(request.method, path, request.headers, () =>
-    request.json()
+  const dashboard =
+    !path &&
+    request.method === "GET" &&
+    new URL(request.url).searchParams.get("view") === "manage"
+  return requestJobs(
+    request.method,
+    path,
+    request.headers,
+    () => request.json(),
+    dashboard
   )
 }
 
@@ -18,11 +26,12 @@ async function requestJobs(
   method: string,
   path: string,
   requestHeaders: Headers,
-  readBody?: () => Promise<unknown>
+  readBody?: () => Promise<unknown>,
+  dashboard = false
 ) {
   if (
     path &&
-    !/^\/[a-z\d_-]{1,128}(?:\/applications(?:\/(?:[a-f\d]{24}|[a-f\d]{64}))?)?$/i.test(
+    !/^\/[a-f\d]{24}(?:\/approval|\/applications(?:\/[a-f\d]{24})?)?$/i.test(
       path
     )
   ) {
@@ -40,7 +49,7 @@ async function requestJobs(
     const adminNeedsCode =
       session?.user.role?.toLowerCase() === "admin" &&
       !session.session.adminCodeVerified
-    if (adminNeedsCode && !readOnly) {
+    if (adminNeedsCode && (!readOnly || dashboard)) {
       return errorResponse(403, "Sign in again with your admin access code.")
     }
 
@@ -65,14 +74,17 @@ async function requestJobs(
       process.env.NEXT_PUBLIC_BASE_API_URL?.trim() ||
       "http://localhost:5000"
     ).replace(/\/+$/, "")
-    const response = await fetch(`${baseUrl}/jobs${path}`, {
-      method,
-      headers,
-      body,
-      cache: "no-store",
-      redirect: "error",
-      signal: AbortSignal.timeout(10_000),
-    })
+    const response = await fetch(
+      `${baseUrl}/jobs${path}${dashboard ? "?view=manage" : ""}`,
+      {
+        method,
+        headers,
+        body,
+        cache: "no-store",
+        redirect: "error",
+        signal: AbortSignal.timeout(10_000),
+      }
+    )
     const data = await response.json().catch(() => null)
     if (!data) {
       return errorResponse(

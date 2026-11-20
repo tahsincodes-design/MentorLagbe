@@ -38,7 +38,7 @@ export function EditJobDialog({
     salary: job.salary == null ? "" : String(job.salary),
     location: job.location ?? "Online",
   })
-  const [active, setActive] = React.useState(job.status !== "closed")
+  const [active, setActive] = React.useState(job.isActive)
   const [saving, setSaving] = React.useState(false)
   const [error, setError] = React.useState("")
 
@@ -47,20 +47,33 @@ export function EditJobDialog({
     setSaving(true)
     setError("")
     try {
-      const { salary, ...details } = payload
-      await updateJob(job._id, {
-        ...details,
-        ...(salary !== String(job.salary ?? "") ? { salary } : {}),
-        status: active ? "open" : "closed",
-      })
-      toast.success("Tuition updated successfully")
+      const changes: Partial<JobPayload> = {}
+      if (payload.title.trim() !== job.title)
+        changes.title = payload.title.trim()
+      if (payload.description.trim() !== job.description)
+        changes.description = payload.description.trim()
+      if (payload.subject.trim() !== (job.subject ?? ""))
+        changes.subject = payload.subject.trim()
+      if (payload.location.trim() !== (job.location ?? "Online"))
+        changes.location = payload.location.trim()
+      if (payload.salary.trim() !== String(job.salary ?? ""))
+        changes.salary = payload.salary.trim()
+      if (active !== job.isActive) changes.isActive = active
+      if (Object.keys(changes).length) {
+        const updated = await updateJob(job._id, changes)
+        toast.success(
+          updated.approvalStatus === "pending"
+            ? "Tuition saved for review"
+            : "Tuition updated"
+        )
+      }
       onOpenChange(false)
       onUpdated()
     } catch (updateError) {
       setError(
         updateError instanceof Error
           ? updateError.message
-          : "Could not update this job."
+          : "Could not update this tuition."
       )
     } finally {
       setSaving(false)

@@ -7,6 +7,11 @@ import {
 
 export type UserRole = "student" | "mentor" | "admin"
 
+export function isTutorRole(role?: string | null) {
+  const normalized = role?.toLowerCase()
+  return normalized === "mentor" || normalized === "tutor"
+}
+
 export const roles: {
   value: UserRole
   label: string
@@ -21,8 +26,8 @@ export const roles: {
   },
   {
     value: "mentor",
-    label: "Mentor",
-    description: "Teach & share your expertise",
+    label: "Tutor",
+    description: "Post tuitions & teach students",
     icon: Users,
   },
   {

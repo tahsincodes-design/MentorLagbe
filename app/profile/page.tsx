@@ -21,7 +21,7 @@ import {
   type LucideIcon,
 } from "lucide-react"
 
-import { roles } from "@/components/auth/roles"
+import { isTutorRole, roles } from "@/components/auth/roles"
 import { EditProfileDialog } from "@/components/profile/edit-profile-dialog"
 import { ProfileBannerArt } from "@/components/profile/profile-banner-art"
 import { SiteFooter } from "@/components/site-footer"
@@ -123,7 +123,8 @@ export default function ProfilePage() {
     return <ProfileSkeleton />
   }
 
-  const roleInfo = roles.find((role) => role.value === user.role) ?? roles[0]
+  const accountRole = isTutorRole(user.role) ? "mentor" : user.role
+  const roleInfo = roles.find((role) => role.value === accountRole) ?? roles[0]
   const RoleIcon = roleInfo.icon
   const memberSince = formatMonthYear(user.createdAt)
   const initials = getInitials(user.name, user.email)

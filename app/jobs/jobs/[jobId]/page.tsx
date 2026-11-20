@@ -4,7 +4,8 @@ import { notFound } from "next/navigation"
 import { ArrowLeft, Banknote, BookOpen, MapPin, UserRound } from "lucide-react"
 
 import { JobApplications } from "@/components/jobs/job-applications"
-import type { JobDetails } from "@/components/jobs/job-types"
+import { TuitionApproval } from "@/components/jobs/tuition-approval"
+import { approvalLabels, type JobDetails } from "@/components/jobs/job-types"
 import { Badge } from "@/components/ui/badge"
 import { readJobDetails } from "@/lib/jobs-proxy"
 
@@ -23,7 +24,7 @@ export default async function JobDetailsPage({
       className="inline-flex items-center gap-2 text-sm font-semibold text-muted-foreground hover:text-foreground"
     >
       <ArrowLeft className="size-4" />
-      Browse jobs
+      Browse tuitions
     </Link>
   )
 
@@ -35,7 +36,7 @@ export default async function JobDetailsPage({
           role="alert"
           className="rounded-xl border border-destructive/20 bg-destructive/5 p-5 text-destructive"
         >
-          Could not load this job. Refresh the page to try again.
+          Could not load this tuition. Refresh the page to try again.
         </p>
       </main>
     )
@@ -46,7 +47,7 @@ export default async function JobDetailsPage({
     application,
     applicants,
   } = (await response.json()) as JobDetails
-  const closed = job.status === "closed"
+  const closed = !job.isActive || job.approvalStatus !== "approved"
   const facts = [
     { label: "Subject", value: job.subject || "Unspecified", icon: BookOpen },
     { label: "Location", value: job.location || "Online", icon: MapPin },
@@ -60,7 +61,7 @@ export default async function JobDetailsPage({
     },
     {
       label: "Posted by",
-      value: job.postedBy?.name || "Job poster",
+      value: job.postedBy?.name || "Tutor",
       icon: UserRound,
     },
   ]
@@ -71,7 +72,11 @@ export default async function JobDetailsPage({
       <div className="mt-5 grid gap-5 lg:grid-cols-[3fr_2fr]">
         <article className="min-w-0 rounded-3xl border bg-card p-6 sm:p-8">
           <Badge variant={closed ? "secondary" : "outline"}>
-            {closed ? "Closed" : "Open to applications"}
+            {job.approvalStatus !== "approved"
+              ? approvalLabels[job.approvalStatus]
+              : closed
+                ? "Paused"
+                : "Open to applications"}
           </Badge>
           <h1 className="mt-3 text-3xl font-extrabold tracking-tight wrap-break-word sm:text-4xl">
             {job.title}
@@ -99,13 +104,17 @@ export default async function JobDetailsPage({
             {job.description}
           </p>
         </article>
-        <JobApplications
-          jobId={job._id}
-          closed={closed}
-          canManage={Boolean(job.canManage)}
-          application={application}
-          applicants={applicants}
-        />
+        {job.canModerate ? (
+          <TuitionApproval job={job} />
+        ) : (
+          <JobApplications
+            jobId={job._id}
+            closed={closed}
+            canManage={job.canManage}
+            application={application}
+            applicants={applicants}
+          />
+        )}
       </div>
     </main>
   )
