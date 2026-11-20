@@ -3,12 +3,13 @@
 import * as React from "react"
 import { useRouter } from "next/navigation"
 
-import { JobsSidebar } from "@/components/jobs/jobs-sidebar"
-import { PostedJobs } from "@/components/jobs/posted-jobs"
+import { TuitionSidebar } from "@/components/tuitions/shared/tuition-sidebar"
+import { TuitionDashboard } from "@/components/tuitions/manage/tuition-dashboard"
 import { isTutorRole } from "@/components/auth/roles"
 import { useSession } from "@/lib/auth-client"
+import { tuitionBrowsePath, tuitionManagePath } from "@/lib/tuitions/routes"
 
-export default function AddJobsPage() {
+export default function ManageTuitionsPage() {
   const router = useRouter()
   const { data: session, isPending } = useSession()
   const user = session?.user
@@ -17,12 +18,12 @@ export default function AddJobsPage() {
   React.useEffect(() => {
     if (isPending) return
     if (!user) {
-      router.replace("/login")
+      router.replace(`/login?next=${encodeURIComponent(tuitionManagePath)}`)
       return
     }
     const role = (user.role ?? "student").toLowerCase()
     if (!isTutorRole(role) && role !== "admin") {
-      router.replace("/jobs/jobs")
+      router.replace(tuitionBrowsePath)
     }
   }, [isPending, user, router])
 
@@ -37,14 +38,18 @@ export default function AddJobsPage() {
 
   return (
     <div className="mx-auto flex min-h-[calc(100svh-5rem)] max-w-[1180px] overflow-hidden border-x border-border bg-background">
-      <JobsSidebar
+      <TuitionSidebar
         name={user.name}
         email={user.email}
         image={user.image}
         role={role}
         openAddJob={() => setOpen(true)}
       />
-      <PostedJobs role={role} openAddJob={open} onOpenAddJobChange={setOpen} />
+      <TuitionDashboard
+        role={role}
+        openAddJob={open}
+        onOpenAddJobChange={setOpen}
+      />
     </div>
   )
 }

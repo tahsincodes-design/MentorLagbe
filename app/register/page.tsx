@@ -20,7 +20,7 @@ import { AuthShell } from "@/components/auth/auth-shell"
 import { ImageDropzone } from "@/components/auth/image-dropzone"
 import { RolePicker } from "@/components/auth/role-picker"
 import { type UserRole } from "@/components/auth/roles"
-import { SiteFooter } from "@/components/site-footer"
+import { SiteFooter } from "@/components/site/site-footer"
 import { Button } from "@/components/ui/button"
 import {
   Card,

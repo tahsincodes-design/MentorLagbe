@@ -4,13 +4,14 @@ import * as React from "react"
 import { Plus } from "lucide-react"
 
 import { isTutorRole } from "@/components/auth/roles"
-import { fetchJobs } from "@/components/jobs/job-api"
-import type { Job } from "@/components/jobs/job-types"
-import { AddJobDialog } from "@/components/jobs/add-job-dialog"
-import { JobCard } from "@/components/jobs/job-card"
+import { fetchJobs } from "@/lib/tuitions/api"
+import type { Job } from "@/lib/tuitions/types"
+import { CreateTuitionDialog } from "@/components/tuitions/manage/create-tuition-dialog"
+import { TuitionCard } from "@/components/tuitions/shared/tuition-card"
+import { TuitionMarquee } from "@/components/tuitions/shared/tuition-marquee"
 import { Button } from "@/components/ui/button"
 
-export function PostedJobs({
+export function TuitionDashboard({
   role,
   openAddJob,
   onOpenAddJobChange,
@@ -105,6 +106,8 @@ export function PostedJobs({
         </div>
       </section>
 
+      {isAdmin ? <TuitionMarquee jobs={jobs} /> : null}
+
       {loading ? (
         <div className="mt-5 grid gap-4 md:grid-cols-2">
           {[1, 2].map((item) => (
@@ -121,7 +124,7 @@ export function PostedJobs({
       ) : jobs.length ? (
         <div className="mt-5 grid gap-4 md:grid-cols-2">
           {jobs.map((job) => (
-            <JobCard
+            <TuitionCard
               key={job._id}
               job={job}
               onChanged={() => void loadJobs()}
@@ -146,7 +149,7 @@ export function PostedJobs({
       )}
 
       {canPost ? (
-        <AddJobDialog
+        <CreateTuitionDialog
           open={addOpen}
           onOpenChange={setAddOpen}
           onCreated={() => void loadJobs()}

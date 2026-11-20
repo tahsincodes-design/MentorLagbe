@@ -1,12 +1,10 @@
 "use client"
 
-import * as React from "react"
-
-import { JobsBrowser } from "@/components/jobs/jobs-browser"
-import { JobsSidebar } from "@/components/jobs/jobs-sidebar"
+import { TuitionBrowser } from "@/components/tuitions/browse/tuition-browser"
+import { TuitionSidebar } from "@/components/tuitions/shared/tuition-sidebar"
 import { useSession } from "@/lib/auth-client"
 
-export default function JobsPage() {
+export default function TuitionsPage() {
   const { data: session, isPending } = useSession()
   const user = session?.user
   const role = user ? (user.role ?? "student") : undefined
@@ -19,13 +17,13 @@ export default function JobsPage() {
 
   return (
     <div className="mx-auto flex min-h-[calc(100svh-5rem)] max-w-[1180px] overflow-hidden border-x border-border bg-background">
-      <JobsSidebar
+      <TuitionSidebar
         name={user?.name}
         email={user?.email}
         image={user?.image}
         role={role}
       />
-      <JobsBrowser key={user?.id ?? "guest"} role={role} />
+      <TuitionBrowser key={user?.id ?? "guest"} role={role} />
     </div>
   )
 }

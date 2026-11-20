@@ -3,24 +3,25 @@ import { headers } from "next/headers"
 import { notFound } from "next/navigation"
 import { ArrowLeft, Banknote, BookOpen, MapPin, UserRound } from "lucide-react"
 
-import { JobApplications } from "@/components/jobs/job-applications"
-import { TuitionApproval } from "@/components/jobs/tuition-approval"
-import { approvalLabels, type JobDetails } from "@/components/jobs/job-types"
+import { TuitionApplications } from "@/components/tuitions/details/tuition-applications"
+import { TuitionApproval } from "@/components/tuitions/details/tuition-approval"
+import { approvalLabels, type JobDetails } from "@/lib/tuitions/types"
 import { Badge } from "@/components/ui/badge"
 import { readJobDetails } from "@/lib/jobs-proxy"
+import { tuitionBrowsePath } from "@/lib/tuitions/routes"
 
-export default async function JobDetailsPage({
+export default async function TuitionDetailsPage({
   params,
 }: {
-  params: Promise<{ jobId: string }>
+  params: Promise<{ tuitionId: string }>
 }) {
-  const { jobId } = await params
-  const response = await readJobDetails(jobId, await headers())
+  const { tuitionId } = await params
+  const response = await readJobDetails(tuitionId, await headers())
   if (response.status === 404) notFound()
 
   const backLink = (
     <Link
-      href="/jobs/jobs"
+      href={tuitionBrowsePath}
       className="inline-flex items-center gap-2 text-sm font-semibold text-muted-foreground hover:text-foreground"
     >
       <ArrowLeft className="size-4" />
@@ -107,7 +108,7 @@ export default async function JobDetailsPage({
         {job.canModerate ? (
           <TuitionApproval job={job} />
         ) : (
-          <JobApplications
+          <TuitionApplications
             jobId={job._id}
             closed={closed}
             canManage={job.canManage}

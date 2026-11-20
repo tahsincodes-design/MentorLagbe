@@ -4,8 +4,8 @@ import * as React from "react"
 import { Loader2, Save } from "lucide-react"
 import { toast } from "sonner"
 
-import { updateJob } from "@/components/jobs/job-api"
-import type { Job, JobPayload } from "@/components/jobs/job-types"
+import { updateJob } from "@/lib/tuitions/api"
+import type { Job, JobPayload } from "@/lib/tuitions/types"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -20,7 +20,7 @@ import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
 import { Textarea } from "@/components/ui/textarea"
 
-export function EditJobDialog({
+export function EditTuitionDialog({
   job,
   open,
   onOpenChange,

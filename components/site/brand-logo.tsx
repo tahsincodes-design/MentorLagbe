@@ -1,3 +1,5 @@
+import Link from "next/link"
+
 import { cn } from "@/lib/utils"
 
 function BrandMark({
@@ -43,13 +45,16 @@ function BrandMark({
 export function BrandLogo({
   className,
   inverse = false,
+  onClick,
 }: {
   className?: string
   inverse?: boolean
+  onClick?: () => void
 }) {
   return (
-    <a
-      href="#home"
+    <Link
+      href="/"
+      onClick={onClick}
       aria-label="MentorLagbe home"
       className={cn(
         "group flex min-w-0 items-center gap-2.5 rounded-full outline-none focus-visible:ring-2 focus-visible:ring-brand-coral/60 focus-visible:ring-offset-4 focus-visible:ring-offset-background",
@@ -65,6 +70,6 @@ export function BrandLogo({
       >
         Mentor<span className="text-brand-coral">Lagbe</span>
       </span>
-    </a>
+    </Link>
   )
 }

@@ -5,9 +5,10 @@ import Link from "next/link"
 import { Pencil, Trash2, Users } from "lucide-react"
 import { toast } from "sonner"
 
-import { deleteJob, setJobStatus } from "@/components/jobs/job-api"
-import { approvalLabels, type Job } from "@/components/jobs/job-types"
-import { EditJobDialog } from "@/components/jobs/edit-job-dialog"
+import { deleteJob, setJobStatus } from "@/lib/tuitions/api"
+import { approvalLabels, type Job } from "@/lib/tuitions/types"
+import { tuitionDetailPath } from "@/lib/tuitions/routes"
+import { EditTuitionDialog } from "@/components/tuitions/manage/edit-tuition-dialog"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -24,7 +25,7 @@ import { Button, buttonVariants } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Switch } from "@/components/ui/switch"
 
-export function JobCard({
+export function TuitionCard({
   job,
   onChanged,
 }: {
@@ -128,7 +129,7 @@ export function JobCard({
           </div>
 
           <Link
-            href={`/jobs/jobs/${encodeURIComponent(jobId)}`}
+            href={tuitionDetailPath(jobId)}
             className={buttonVariants({
               variant: "outline",
               size: "sm",
@@ -202,7 +203,7 @@ export function JobCard({
       </Card>
 
       {editOpen ? (
-        <EditJobDialog
+        <EditTuitionDialog
           job={job}
           open={editOpen}
           onOpenChange={setEditOpen}

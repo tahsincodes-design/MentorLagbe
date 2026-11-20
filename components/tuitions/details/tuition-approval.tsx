@@ -3,8 +3,8 @@
 import * as React from "react"
 import { useRouter } from "next/navigation"
 
-import { reviewTuition } from "@/components/jobs/job-api"
-import { approvalLabels, type Job } from "@/components/jobs/job-types"
+import { reviewTuition } from "@/lib/tuitions/api"
+import { approvalLabels, type Job } from "@/lib/tuitions/types"
 import { Button } from "@/components/ui/button"
 
 export function TuitionApproval({ job }: { job: Job }) {

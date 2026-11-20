@@ -5,14 +5,15 @@ import Link from "next/link"
 import { Search } from "lucide-react"
 
 import { isTutorRole } from "@/components/auth/roles"
-import { fetchJobs } from "@/components/jobs/job-api"
-import type { Job } from "@/components/jobs/job-types"
-import { JobCard } from "@/components/jobs/job-card"
-import { JobsMarquee } from "@/components/jobs/jobs-marquee"
+import { fetchJobs } from "@/lib/tuitions/api"
+import type { Job } from "@/lib/tuitions/types"
+import { TuitionCard } from "@/components/tuitions/shared/tuition-card"
+import { TuitionMarquee } from "@/components/tuitions/shared/tuition-marquee"
 import { buttonVariants } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { tuitionManagePath } from "@/lib/tuitions/routes"
 
-export function JobsBrowser({ role }: { role?: string }) {
+export function TuitionBrowser({ role }: { role?: string }) {
   const [jobs, setJobs] = React.useState<Job[]>([])
   const [search, setSearch] = React.useState("")
   const [category, setCategory] = React.useState("")
@@ -61,6 +62,7 @@ export function JobsBrowser({ role }: { role?: string }) {
   }, [])
 
   const normalizedRole = role?.toLowerCase()
+  const showMarquee = normalizedRole === "student" || normalizedRole === "admin"
   const hasDashboard = isTutorRole(normalizedRole) || normalizedRole === "admin"
   const subjects = new Map(
     jobs.flatMap(({ subject }) =>
@@ -97,7 +99,7 @@ export function JobsBrowser({ role }: { role?: string }) {
         {hasDashboard ? (
           <div className="mt-5 flex flex-wrap gap-2">
             <Link
-              href="/jobs/add-jobs"
+              href={tuitionManagePath}
               className={buttonVariants({ variant: "outline" })}
             >
               {normalizedRole === "admin" ? "Tuition approvals" : "My tuitions"}
@@ -106,9 +108,7 @@ export function JobsBrowser({ role }: { role?: string }) {
         ) : null}
       </section>
 
-      <div className="mt-5">
-        <JobsMarquee jobs={jobs} />
-      </div>
+      {showMarquee ? <TuitionMarquee jobs={jobs} /> : null}
 
       <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center">
         <div className="relative flex-1">
@@ -159,7 +159,7 @@ export function JobsBrowser({ role }: { role?: string }) {
       ) : visibleJobs.length ? (
         <div className="mt-5 grid gap-4 md:grid-cols-2">
           {visibleJobs.map((job) => (
-            <JobCard
+            <TuitionCard
               key={job._id}
               job={job}
               onChanged={() => void loadJobs()}

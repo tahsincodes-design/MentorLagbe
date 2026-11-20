@@ -14,9 +14,10 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { signOut } from "@/lib/auth-client"
 import { cn } from "@/lib/utils"
+import { tuitionBrowsePath, tuitionManagePath } from "@/lib/tuitions/routes"
 import { isTutorRole } from "@/components/auth/roles"
 
-type JobsSidebarProps = {
+type TuitionSidebarProps = {
   name?: string
   email?: string
   image?: string | null
@@ -24,13 +25,13 @@ type JobsSidebarProps = {
   openAddJob?: () => void
 }
 
-export function JobsSidebar({
+export function TuitionSidebar({
   name = "MentorLagbe User",
   email,
   image,
   role,
   openAddJob,
-}: JobsSidebarProps) {
+}: TuitionSidebarProps) {
   const pathname = usePathname()
   const router = useRouter()
   const normalizedRole = role?.toLowerCase()
@@ -39,12 +40,16 @@ export function JobsSidebar({
   const isAdmin = normalizedRole === "admin"
   const items = [
     { label: "Home", href: "/", icon: LayoutDashboard },
-    { label: "Browse tuitions", href: "/jobs/jobs", icon: BriefcaseBusiness },
+    {
+      label: "Browse tuitions",
+      href: tuitionBrowsePath,
+      icon: BriefcaseBusiness,
+    },
     ...(isTutor || isAdmin
       ? [
           {
             label: isAdmin ? "Tuition approvals" : "My tuitions",
-            href: "/jobs/add-jobs",
+            href: tuitionManagePath,
             icon: BriefcaseBusiness,
           },
         ]
@@ -93,7 +98,9 @@ export function JobsSidebar({
           const Icon = item.icon
           const active =
             pathname === item.href ||
-            (item.href === "/jobs/jobs" && pathname.startsWith("/jobs/jobs/"))
+            (item.href === tuitionBrowsePath &&
+              pathname !== tuitionManagePath &&
+              pathname.startsWith(`${tuitionBrowsePath}/`))
 
           return (
             <Link

@@ -4,8 +4,8 @@ import * as React from "react"
 import { Loader2, Upload } from "lucide-react"
 import { toast } from "sonner"
 
-import { createJob } from "@/components/jobs/job-api"
-import type { JobPayload } from "@/components/jobs/job-types"
+import { createJob } from "@/lib/tuitions/api"
+import type { JobPayload } from "@/lib/tuitions/types"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -28,7 +28,7 @@ const emptyPayload: JobPayload = {
   location: "Online",
 }
 
-export function AddJobDialog({
+export function CreateTuitionDialog({
   open,
   onOpenChange,
   onCreated,

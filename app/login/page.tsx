@@ -7,7 +7,7 @@ import { ArrowRight, Eye, EyeOff, Loader2, Lock, Mail } from "lucide-react"
 
 import { AuthShell } from "@/components/auth/auth-shell"
 import { isTutorRole, roles, type UserRole } from "@/components/auth/roles"
-import { SiteFooter } from "@/components/site-footer"
+import { SiteFooter } from "@/components/site/site-footer"
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -22,6 +22,7 @@ import { Label } from "@/components/ui/label"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { signIn, signOut } from "@/lib/auth-client"
 import { cn } from "@/lib/utils"
+import { tuitionReturnPath } from "@/lib/tuitions/routes"
 
 export default function LoginPage() {
   const router = useRouter()
@@ -71,7 +72,7 @@ export default function LoginPage() {
       }
 
       const next = new URLSearchParams(window.location.search).get("next")
-      router.push(next && /^\/jobs\/jobs\/[a-z\d_-]+$/i.test(next) ? next : "/")
+      router.push(tuitionReturnPath(next))
       router.refresh()
     } catch {
       setError("Could not sign in. Please try again.")

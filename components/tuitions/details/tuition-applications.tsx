@@ -4,16 +4,14 @@ import * as React from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 
-import { applyForJob, reviewJobApplication } from "@/components/jobs/job-api"
-import type {
-  ApplicationStatus,
-  JobApplication,
-} from "@/components/jobs/job-types"
+import { applyForJob, reviewJobApplication } from "@/lib/tuitions/api"
+import type { ApplicationStatus, JobApplication } from "@/lib/tuitions/types"
 import { Badge } from "@/components/ui/badge"
 import { Button, buttonVariants } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { useSession } from "@/lib/auth-client"
+import { tuitionDetailPath } from "@/lib/tuitions/routes"
 
 const statusLabel: Record<ApplicationStatus, string> = {
   pending: "Pending review",
@@ -21,7 +19,7 @@ const statusLabel: Record<ApplicationStatus, string> = {
   rejected: "Declined",
 }
 
-export function JobApplications({
+export function TuitionApplications({
   jobId,
   closed,
   canManage,
@@ -151,7 +149,7 @@ export function JobApplications({
         </p>
       ) : !session ? (
         <Link
-          href={`/login?next=${encodeURIComponent(`/jobs/jobs/${jobId}`)}`}
+          href={`/login?next=${encodeURIComponent(tuitionDetailPath(jobId))}`}
           className={buttonVariants({ className: "mt-4" })}
         >
           Sign in to apply

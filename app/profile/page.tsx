@@ -24,13 +24,14 @@ import {
 import { isTutorRole, roles } from "@/components/auth/roles"
 import { EditProfileDialog } from "@/components/profile/edit-profile-dialog"
 import { ProfileBannerArt } from "@/components/profile/profile-banner-art"
-import { SiteFooter } from "@/components/site-footer"
+import { SiteFooter } from "@/components/site/site-footer"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Button, buttonVariants } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { useSession } from "@/lib/auth-client"
 import { cn } from "@/lib/utils"
+import { tuitionBrowsePath } from "@/lib/tuitions/routes"
 
 type AccountStats = {
   totalApplied: number
@@ -54,7 +55,7 @@ const quickActions: {
   href: string
   icon: LucideIcon
 }[] = [
-  { label: "Browse Tuitions", href: "/jobs/jobs", icon: Search },
+  { label: "Browse Tuitions", href: tuitionBrowsePath, icon: Search },
   { label: "View Saved Tuitions", href: "/#saved-tuitions", icon: Bookmark },
   { label: "Upgrade to Pro", href: "/#pricing", icon: Crown },
 ]

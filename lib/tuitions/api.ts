@@ -3,7 +3,7 @@ import type {
   ApprovalStatus,
   Job,
   JobPayload,
-} from "@/components/jobs/job-types"
+} from "@/lib/tuitions/types"
 
 async function request<T>(path: string, method = "GET", payload?: object) {
   const response = await fetch(path, {

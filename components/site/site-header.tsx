@@ -3,10 +3,11 @@
 import * as React from "react"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
-import { ChevronDown, LogOut, Menu, Search, User, X } from "lucide-react"
+import { ChevronDown, LogOut, Menu, User, X } from "lucide-react"
 
-import { BrandLogo } from "@/components/brand-logo"
+import { BrandLogo } from "@/components/site/brand-logo"
 import { isTutorRole } from "@/components/auth/roles"
+import { publicNavigation } from "@/components/site/navigation"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button, buttonVariants } from "@/components/ui/button"
@@ -20,15 +21,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { signOut, useSession } from "@/lib/auth-client"
+import { tuitionBrowsePath, tuitionManagePath } from "@/lib/tuitions/routes"
 import { cn } from "@/lib/utils"
-
-const navItems = [
-  { label: "Home", href: "#home" },
-  { label: "Browse Tuitions", href: "/jobs/jobs" },
-  { label: "Pricing", href: "#pricing" },
-  { label: "How It Works", href: "#how-it-works" },
-  { label: "About", href: "#about" },
-]
 
 const signInClassName = cn(
   buttonVariants({ variant: "outline" }),
@@ -46,23 +40,25 @@ export function SiteHeader() {
   const [menuOpen, setMenuOpen] = React.useState(false)
   const { data: session } = useSession()
   const user = session?.user
-  const isAdmin = user?.role === "admin"
+  const isAdmin = user?.role?.toLowerCase() === "admin"
+  const isTutor = isTutorRole(user?.role)
   const navigation =
-    isAdmin || isTutorRole(user?.role)
+    isAdmin || isTutor
       ? [
-          ...navItems,
+          ...publicNavigation,
           {
             label: isAdmin ? "Tuition Approvals" : "My Tuitions",
-            href: "/jobs/add-jobs",
+            href: tuitionManagePath,
           },
         ]
-      : navItems
+      : publicNavigation
 
   function isActive(href: string) {
     return (
       pathname === href ||
-      (href === "#home" && pathname === "/") ||
-      (href === "/jobs/jobs" && pathname.startsWith("/jobs/jobs/"))
+      (href === tuitionBrowsePath &&
+        pathname !== tuitionManagePath &&
+        pathname.startsWith(`${tuitionBrowsePath}/`))
     )
   }
 
@@ -84,7 +80,7 @@ export function SiteHeader() {
       <div className="mx-auto max-w-6xl">
         <div className="rounded-full border border-border bg-card/95 px-3 py-2 shadow-[0_18px_40px_-24px_rgba(20,33,61,0.45)] backdrop-blur-md sm:px-5">
           <div className="grid grid-cols-[auto_1fr] items-center gap-3 md:grid-cols-[auto_1fr_auto]">
-            <BrandLogo />
+            <BrandLogo onClick={() => setMenuOpen(false)} />
 
             <nav
               aria-label="Primary"
@@ -94,7 +90,7 @@ export function SiteHeader() {
                 const active = isActive(item.href)
 
                 return (
-                  <a
+                  <Link
                     key={item.href}
                     href={item.href}
                     aria-current={active ? "page" : undefined}
@@ -114,22 +110,13 @@ export function SiteHeader() {
                           : "scale-x-0 group-hover:scale-x-100"
                       )}
                     />
-                  </a>
+                  </Link>
                 )
               })}
             </nav>
 
             <div className="flex items-center justify-end gap-1 sm:gap-2">
               <ThemeToggle />
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                aria-label="Search"
-                className="hidden size-10 rounded-full text-foreground hover:bg-foreground/5 hover:text-foreground sm:inline-flex"
-              >
-                <Search className="size-[1.15rem]" />
-              </Button>
 
               {user ? (
                 <DropdownMenu>
@@ -163,7 +150,7 @@ export function SiteHeader() {
                     <DropdownMenuGroup>
                       <DropdownMenuLabel className="flex items-center gap-1.5">
                         <span className="rounded-full bg-brand-coral/10 px-2 py-0.5 text-[0.65rem] font-bold tracking-wide text-brand-coral-deep uppercase dark:text-brand-coral">
-                          {user.role ?? "student"}
+                          {isTutor ? "tutor" : (user.role ?? "student")}
                         </span>
                       </DropdownMenuLabel>
                     </DropdownMenuGroup>
@@ -185,18 +172,18 @@ export function SiteHeader() {
 
               {!user ? (
                 <>
-                  <a
+                  <Link
                     href="/login"
                     className={cn(signInClassName, "hidden sm:inline-flex")}
                   >
                     Sign In
-                  </a>
-                  <a
+                  </Link>
+                  <Link
                     href="/register"
                     className={cn(signUpClassName, "hidden sm:inline-flex")}
                   >
                     Sign Up
-                  </a>
+                  </Link>
                 </>
               ) : null}
 
@@ -230,7 +217,7 @@ export function SiteHeader() {
                 const active = isActive(item.href)
 
                 return (
-                  <a
+                  <Link
                     key={item.href}
                     href={item.href}
                     aria-current={active ? "page" : undefined}
@@ -243,7 +230,7 @@ export function SiteHeader() {
                     )}
                   >
                     {item.label}
-                  </a>
+                  </Link>
                 )
               })}
             </nav>
@@ -290,20 +277,20 @@ export function SiteHeader() {
               </div>
             ) : (
               <div className="mt-3 grid grid-cols-2 gap-2 border-t border-border pt-3">
-                <a
+                <Link
                   href="/login"
                   onClick={() => setMenuOpen(false)}
                   className={cn(signInClassName, "w-full")}
                 >
                   Sign In
-                </a>
-                <a
+                </Link>
+                <Link
                   href="/register"
                   onClick={() => setMenuOpen(false)}
                   className={cn(signUpClassName, "w-full")}
                 >
                   Sign Up
-                </a>
+                </Link>
               </div>
             )}
           </div>

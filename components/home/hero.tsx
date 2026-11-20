@@ -4,7 +4,6 @@ import {
   ArrowRight,
   BookOpen,
   GraduationCap,
-  Megaphone,
   Sparkles,
   Star,
   UserCheck,
@@ -14,6 +13,7 @@ import {
 import { Badge } from "@/components/ui/badge"
 import { buttonVariants } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
+import { tuitionBrowsePath } from "@/lib/tuitions/routes"
 import { cn } from "@/lib/utils"
 
 const stats = [
@@ -61,25 +61,24 @@ export function Hero() {
           </p>
 
           <div className="mt-8 flex flex-wrap items-center gap-x-4 gap-y-3">
-            <a
-              href="#whats-new"
+            <Link
+              href={tuitionBrowsePath}
               className={cn(
                 buttonVariants({ size: "lg" }),
                 "h-11 rounded-full bg-foreground px-5 text-background shadow-[0_14px_24px_-16px_rgba(20,33,61,0.8)] hover:bg-foreground/90"
               )}
             >
-              <Megaphone className="size-4" />
-              What&apos;s New
+              Browse Tuitions
               <ArrowRight className="size-4" />
-            </a>
+            </Link>
             <Link
-              href="/jobs/jobs"
+              href="/#how-it-works"
               className={cn(
                 buttonVariants({ variant: "ghost", size: "lg" }),
                 "h-11 rounded-full px-4 text-foreground hover:bg-foreground/5"
               )}
             >
-              Browse Tuitions
+              How It Works
               <ArrowRight className="size-4" />
             </Link>
           </div>

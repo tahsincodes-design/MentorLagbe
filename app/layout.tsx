@@ -1,7 +1,7 @@
 import { Caveat, Geist, Geist_Mono } from "next/font/google"
 
 import "./globals.css"
-import { SiteHeader } from "@/components/site-header"
+import { SiteHeader } from "@/components/site/site-header"
 import { ThemeProvider } from "@/components/theme-provider"
 import { Toaster } from "@/components/ui/sonner"
 import { cn } from "@/lib/utils"
