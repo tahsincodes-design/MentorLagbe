@@ -1,8 +1,7 @@
 export type JobStatus = "open" | "closed"
 
 export type Job = {
-  _id?: string
-  id?: string
+  _id: string
   title: string
   description: string
   subject?: string
@@ -12,9 +11,8 @@ export type Job = {
   createdAt?: string
   postedBy?: {
     name?: string
-    email?: string
-    role?: string
   }
+  canManage?: boolean
 }
 
 export type JobPayload = {
@@ -23,4 +21,20 @@ export type JobPayload = {
   subject: string
   salary: string
   location: string
+  status?: JobStatus
+}
+
+export type ApplicationStatus = "pending" | "accepted" | "rejected"
+
+export type JobApplication = {
+  _id: string
+  name: string
+  message: string
+  status: ApplicationStatus
+}
+
+export type JobDetails = {
+  data: Job
+  application: { status: ApplicationStatus } | null
+  applicants: JobApplication[]
 }

@@ -36,6 +36,7 @@ import { signUp } from "@/lib/auth-client"
 export default function RegisterPage() {
   const router = useRouter()
   const [role, setRole] = React.useState<UserRole>("student")
+  const [adminCode, setAdminCode] = React.useState("")
   const [name, setName] = React.useState("")
   const [email, setEmail] = React.useState("")
   const [password, setPassword] = React.useState("")
@@ -49,22 +50,29 @@ export default function RegisterPage() {
     setError("")
     setLoading(true)
 
-    const result = await signUp.email({
-      name,
-      email,
-      password,
-      image: image || undefined,
-      role,
-    })
-
-    if (result.error) {
-      setError(result.error.message ?? "Could not create your account.")
+    try {
+      const result = await signUp.email({
+        name,
+        email,
+        password,
+        image: image || undefined,
+        role,
+        fetchOptions:
+          role === "admin"
+            ? { headers: { "x-admin-code": adminCode.trim() } }
+            : undefined,
+      })
+      if (result.error) {
+        setError(result.error.message ?? "Could not create your account.")
+        return
+      }
+      router.push("/")
+      router.refresh()
+    } catch {
+      setError("Could not create your account. Please try again.")
+    } finally {
       setLoading(false)
-      return
     }
-
-    router.push("/")
-    router.refresh()
   }
 
   return (
@@ -172,6 +180,20 @@ export default function RegisterPage() {
                   </button>
                 </div>
               </div>
+
+              {role === "admin" ? (
+                <div className="space-y-1.5">
+                  <Label htmlFor="register-admin-code">Admin access code</Label>
+                  <Input
+                    id="register-admin-code"
+                    type="password"
+                    autoComplete="off"
+                    value={adminCode}
+                    onChange={(event) => setAdminCode(event.target.value)}
+                    required
+                  />
+                </div>
+              ) : null}
 
               <div className="flex flex-col gap-1.5">
                 <p className="text-xs font-semibold text-muted-foreground">

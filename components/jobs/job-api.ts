@@ -1,76 +1,70 @@
-import type { Job, JobPayload, JobStatus } from "@/components/jobs/job-types"
+import type {
+  ApplicationStatus,
+  Job,
+  JobPayload,
+  JobStatus,
+} from "@/components/jobs/job-types"
 
-const API_BASE_URL = (
-  process.env.NEXT_PUBLIC_BASE_API_URL ?? "http://localhost:5000"
-).replace(/\/$/, "")
-
-async function getAuthHeaders() {
-  const headers: Record<string, string> = {
-    "Content-Type": "application/json",
-  }
-  return headers
-}
-
-async function readResponse<T>(response: Response): Promise<T> {
+async function request<T>(path: string, method = "GET", payload?: object) {
+  const response = await fetch(path, {
+    method,
+    cache: "no-store",
+    headers: payload ? { "Content-Type": "application/json" } : undefined,
+    body: payload ? JSON.stringify(payload) : undefined,
+  })
   const data = await response.json().catch(() => null)
-
-  if (!response.ok) {
+  if (!response.ok || !data?.success) {
     throw new Error(
-      data?.message ??
-        data?.error ??
-        `Request failed with status ${response.status}`
+      data?.message ?? `Request failed with status ${response.status}`
     )
   }
-
   return data as T
 }
 
-export async function fetchJobs(): Promise<Job[]> {
-  const response = await fetch("/api/jobs", {
-    method: "GET",
-    cache: "no-store",
-  })
-  const data = await readResponse<{ success: boolean; data?: Job[] }>(response)
-  return Array.isArray(data.data) ? data.data : []
+function jobPath(jobId: string) {
+  return `/api/jobs/${encodeURIComponent(jobId)}`
 }
 
-export async function createJob(payload: JobPayload): Promise<Job> {
-  const headers = await getAuthHeaders()
-  const response = await fetch("/api/jobs", {
-    method: "POST",
-    headers,
-    body: JSON.stringify(payload),
-  })
-  const data = await readResponse<{ success: boolean; data?: Job }>(response)
-  if (!data.data) throw new Error("The API did not return the created job.")
-  return data.data
+export async function fetchJobs() {
+  const result = await request<{ data: Job[] }>("/api/jobs")
+  return result.data
 }
 
-export async function updateJob(jobId: string, payload: JobPayload) {
-  const headers = await getAuthHeaders()
-  const response = await fetch(`${API_BASE_URL}/jobs/${jobId}`, {
-    method: "PUT",
-    headers,
-    body: JSON.stringify(payload),
-  })
-  return readResponse<{ success: boolean; data?: Job }>(response)
+export async function createJob(payload: JobPayload) {
+  const result = await request<{ data: Job }>("/api/jobs", "POST", payload)
+  return result.data
 }
 
-export async function setJobStatus(jobId: string, status: JobStatus) {
-  const headers = await getAuthHeaders()
-  const response = await fetch(`${API_BASE_URL}/jobs/${jobId}`, {
-    method: "PATCH",
-    headers,
-    body: JSON.stringify({ status }),
-  })
-  return readResponse<{ success: boolean; data?: Job }>(response)
+export async function updateJob(jobId: string, payload: Partial<JobPayload>) {
+  const result = await request<{ data: Job }>(jobPath(jobId), "PATCH", payload)
+  return result.data
 }
 
-export async function deleteJob(jobId: string) {
-  const headers = await getAuthHeaders()
-  const response = await fetch(`${API_BASE_URL}/jobs/${jobId}`, {
-    method: "DELETE",
-    headers,
-  })
-  return readResponse<{ success: boolean }>(response)
+export function setJobStatus(jobId: string, status: JobStatus) {
+  return updateJob(jobId, { status })
+}
+
+export function deleteJob(jobId: string) {
+  return request(jobPath(jobId), "DELETE")
+}
+
+export async function applyForJob(jobId: string, message: string) {
+  const result = await request<{ data: { status: ApplicationStatus } }>(
+    `${jobPath(jobId)}/applications`,
+    "POST",
+    { message }
+  )
+  return result.data
+}
+
+export function reviewJobApplication(
+  jobId: string,
+  applicationId: string,
+  status: "accepted" | "rejected"
+) {
+  return request(
+    `${jobPath(jobId)}/applications/${encodeURIComponent(applicationId)}`,
+    "PATCH",
+    { status }
+  )
 }

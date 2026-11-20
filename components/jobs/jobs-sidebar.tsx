@@ -29,18 +29,22 @@ export function JobsSidebar({
   name = "MentorLagbe User",
   email,
   image,
-  role = "student",
+  role,
   openAddJob,
 }: JobsSidebarProps) {
   const pathname = usePathname()
   const router = useRouter()
-  const normalizedRole = role.toLowerCase()
+  const normalizedRole = role?.toLowerCase()
 
   const items =
     normalizedRole === "admin"
       ? [
           { label: "Dashboard", href: "/", icon: LayoutDashboard },
-          { label: "Jobs", href: "/jobs/jobs", icon: BriefcaseBusiness },
+          {
+            label: "Manage Jobs",
+            href: "/jobs/add-jobs",
+            icon: BriefcaseBusiness,
+          },
           { label: "Users", href: "/#users", icon: UsersRound },
           { label: "Profile", href: "/profile", icon: UserRound },
           { label: "Settings", href: "/#settings", icon: Settings },
@@ -58,7 +62,12 @@ export function JobsSidebar({
           ]
         : [
             { label: "Dashboard", href: "/", icon: LayoutDashboard },
-            { label: "My Jobs", href: "/jobs/jobs", icon: BriefcaseBusiness },
+            {
+              label: normalizedRole === "student" ? "My Jobs" : "Browse Jobs",
+              href:
+                normalizedRole === "student" ? "/jobs/add-jobs" : "/jobs/jobs",
+              icon: BriefcaseBusiness,
+            },
             { label: "Applications", href: "/#applications", icon: UsersRound },
             { label: "Profile", href: "/profile", icon: UserRound },
             { label: "Settings", href: "/#settings", icon: Settings },
@@ -91,7 +100,9 @@ export function JobsSidebar({
             ? "Admin"
             : normalizedRole === "mentor"
               ? "Mentor"
-              : "Student"}
+              : normalizedRole === "student"
+                ? "Student"
+                : "Guest"}
         </span>
       </div>
 
@@ -100,7 +111,7 @@ export function JobsSidebar({
           const Icon = item.icon
           const active =
             pathname === item.href ||
-            (item.href === "/jobs/jobs" && pathname.startsWith("/jobs"))
+            (item.href === "/jobs/jobs" && pathname.startsWith("/jobs/jobs/"))
 
           return (
             <Link

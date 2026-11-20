@@ -1,4 +1,5 @@
 import Image from "next/image"
+import Link from "next/link"
 import {
   ArrowRight,
   BookOpen,
@@ -71,8 +72,8 @@ export function Hero() {
               What&apos;s New
               <ArrowRight className="size-4" />
             </a>
-            <a
-              href="#browse-tuitions"
+            <Link
+              href="/jobs/jobs"
               className={cn(
                 buttonVariants({ variant: "ghost", size: "lg" }),
                 "h-11 rounded-full px-4 text-foreground hover:bg-foreground/5"
@@ -80,7 +81,7 @@ export function Hero() {
             >
               Browse Tuitions
               <ArrowRight className="size-4" />
-            </a>
+            </Link>
           </div>
         </div>
 

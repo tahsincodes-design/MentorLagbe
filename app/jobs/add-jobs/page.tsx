@@ -43,12 +43,7 @@ export default function AddJobsPage() {
         role={role}
         openAddJob={() => setOpen(true)}
       />
-      <PostedJobs
-        role={role}
-        userEmail={user.email}
-        openAddJob={open}
-        onOpenAddJobChange={setOpen}
-      />
+      <PostedJobs role={role} openAddJob={open} onOpenAddJobChange={setOpen} />
     </div>
   )
 }

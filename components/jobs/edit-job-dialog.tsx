@@ -4,8 +4,8 @@ import * as React from "react"
 import { Loader2, Save } from "lucide-react"
 import { toast } from "sonner"
 
-import { setJobStatus, updateJob } from "@/components/jobs/job-api"
-import type { Job, JobPayload, JobStatus } from "@/components/jobs/job-types"
+import { updateJob } from "@/components/jobs/job-api"
+import type { Job, JobPayload } from "@/components/jobs/job-types"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -26,36 +26,33 @@ export function EditJobDialog({
   onOpenChange,
   onUpdated,
 }: {
-  job: Job | null
+  job: Job
   open: boolean
   onOpenChange: (open: boolean) => void
   onUpdated: () => void
 }) {
   const [payload, setPayload] = React.useState<JobPayload>({
-    title: job?.title ?? "",
-    description: job?.description ?? "",
-    subject: job?.subject ?? "",
-    salary: job?.salary == null ? "" : String(job.salary),
-    location: job?.location ?? "Online",
+    title: job.title,
+    description: job.description,
+    subject: job.subject ?? "",
+    salary: job.salary == null ? "" : String(job.salary),
+    location: job.location ?? "Online",
   })
-  const [active, setActive] = React.useState(job?.status !== "closed")
+  const [active, setActive] = React.useState(job.status !== "closed")
   const [saving, setSaving] = React.useState(false)
   const [error, setError] = React.useState("")
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault()
-    if (!job) return
-    const jobId = job._id ?? job.id
-    if (!jobId) {
-      setError("This job does not have a valid ID.")
-      return
-    }
-
     setSaving(true)
     setError("")
     try {
-      await updateJob(jobId, payload)
-      await setJobStatus(jobId, (active ? "open" : "closed") as JobStatus)
+      const { salary, ...details } = payload
+      await updateJob(job._id, {
+        ...details,
+        ...(salary !== String(job.salary ?? "") ? { salary } : {}),
+        status: active ? "open" : "closed",
+      })
       toast.success("Tuition updated successfully")
       onOpenChange(false)
       onUpdated()
@@ -81,6 +78,7 @@ export function EditJobDialog({
             <Label htmlFor="edit-title">Tuition Title</Label>
             <Input
               id="edit-title"
+              required
               value={payload.title}
               onChange={(event) =>
                 setPayload((current) => ({
@@ -95,6 +93,8 @@ export function EditJobDialog({
             <Textarea
               id="edit-description"
               rows={4}
+              maxLength={1500}
+              required
               value={payload.description}
               onChange={(event) =>
                 setPayload((current) => ({
@@ -105,10 +105,24 @@ export function EditJobDialog({
             />
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
+            <div className="space-y-1.5 sm:col-span-2">
+              <Label htmlFor="edit-subject">Subject</Label>
+              <Input
+                id="edit-subject"
+                value={payload.subject}
+                onChange={(event) =>
+                  setPayload((current) => ({
+                    ...current,
+                    subject: event.target.value,
+                  }))
+                }
+              />
+            </div>
             <div className="space-y-1.5">
               <Label htmlFor="edit-salary">Monthly Fee</Label>
               <Input
                 id="edit-salary"
+                inputMode="decimal"
                 value={payload.salary}
                 onChange={(event) =>
                   setPayload((current) => ({
@@ -134,12 +148,13 @@ export function EditJobDialog({
           </div>
           <div className="flex items-center justify-between rounded-xl border border-border px-4 py-3">
             <div>
-              <Label>Active Status</Label>
+              <Label htmlFor="edit-job-active">Active Status</Label>
               <p className="mt-1 text-xs text-muted-foreground">
                 Open or close this tuition.
               </p>
             </div>
             <Switch
+              id="edit-job-active"
               checked={active}
               onCheckedChange={setActive}
               className="data-checked:bg-brand-coral"

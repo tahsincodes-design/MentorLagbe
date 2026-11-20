@@ -27,6 +27,7 @@ export default function LoginPage() {
   const router = useRouter()
   const [tab, setTab] = React.useState("credentials")
   const [role, setRole] = React.useState<UserRole>("student")
+  const [adminCode, setAdminCode] = React.useState("")
   const [email, setEmail] = React.useState("")
   const [password, setPassword] = React.useState("")
   const [rememberMe, setRememberMe] = React.useState(true)
@@ -39,29 +40,40 @@ export default function LoginPage() {
     setError("")
     setLoading(true)
 
-    const result = await signIn.email({ email, password, rememberMe })
+    try {
+      const result = await signIn.email({
+        email,
+        password,
+        rememberMe,
+        fetchOptions:
+          role === "admin"
+            ? { headers: { "x-admin-code": adminCode.trim() } }
+            : undefined,
+      })
+      if (result.error) {
+        setError(result.error.message ?? "Invalid email or password.")
+        return
+      }
 
-    if (result.error) {
-      setError(result.error.message ?? "Invalid email or password.")
+      const accountRole = result.data?.user?.role
+      if (accountRole && accountRole !== role) {
+        await signOut()
+        const label =
+          roles.find((item) => item.value === accountRole)?.label ?? accountRole
+        setError(
+          `This account is registered as a ${label}. Pick ${label} and try again.`
+        )
+        return
+      }
+
+      const next = new URLSearchParams(window.location.search).get("next")
+      router.push(next && /^\/jobs\/jobs\/[a-z\d_-]+$/i.test(next) ? next : "/")
+      router.refresh()
+    } catch {
+      setError("Could not sign in. Please try again.")
+    } finally {
       setLoading(false)
-      return
     }
-
-    const accountRole = result.data?.user?.role
-
-    if (accountRole && accountRole !== role) {
-      await signOut()
-      const label =
-        roles.find((item) => item.value === accountRole)?.label ?? accountRole
-      setError(
-        `This account is registered as a ${label}. Pick ${label} and try again.`
-      )
-      setLoading(false)
-      return
-    }
-
-    router.push("/")
-    router.refresh()
   }
 
   return (
@@ -176,6 +188,22 @@ export default function LoginPage() {
                       )}
                     </button>
                   </div>
+
+                  {role === "admin" ? (
+                    <div className="space-y-1.5">
+                      <Label htmlFor="login-admin-code">
+                        Admin access code
+                      </Label>
+                      <Input
+                        id="login-admin-code"
+                        type="password"
+                        autoComplete="off"
+                        value={adminCode}
+                        onChange={(event) => setAdminCode(event.target.value)}
+                        required
+                      />
+                    </div>
+                  ) : null}
 
                   <div className="flex items-center justify-between gap-3">
                     <Label

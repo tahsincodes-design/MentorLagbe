@@ -54,7 +54,7 @@ const quickActions: {
   href: string
   icon: LucideIcon
 }[] = [
-  { label: "Browse Tuitions", href: "/#browse-tuitions", icon: Search },
+  { label: "Browse Tuitions", href: "/jobs/jobs", icon: Search },
   { label: "View Saved Tuitions", href: "/#saved-tuitions", icon: Bookmark },
   { label: "Upgrade to Pro", href: "/#pricing", icon: Crown },
 ]

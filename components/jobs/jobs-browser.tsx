@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import Link from "next/link"
 import { Plus, Search } from "lucide-react"
 
 import { fetchJobs } from "@/components/jobs/job-api"
@@ -8,16 +9,10 @@ import type { Job } from "@/components/jobs/job-types"
 import { JobCard } from "@/components/jobs/job-card"
 import { JobsMarquee } from "@/components/jobs/jobs-marquee"
 import { AddJobDialog } from "@/components/jobs/add-job-dialog"
-import { Button } from "@/components/ui/button"
+import { Button, buttonVariants } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 
-export function JobsBrowser({
-  role,
-  userEmail,
-}: {
-  role: string
-  userEmail?: string
-}) {
+export function JobsBrowser({ role }: { role?: string }) {
   const [jobs, setJobs] = React.useState<Job[]>([])
   const [search, setSearch] = React.useState("")
   const [category, setCategory] = React.useState("All")
@@ -28,6 +23,7 @@ export function JobsBrowser({
   const loadJobs = React.useCallback(async () => {
     try {
       setJobs(await fetchJobs())
+      setError("")
     } catch (loadError) {
       setError(
         loadError instanceof Error ? loadError.message : "Could not load jobs."
@@ -63,7 +59,7 @@ export function JobsBrowser({
     }
   }, [])
 
-  const normalizedRole = role.toLowerCase()
+  const normalizedRole = role?.toLowerCase()
   const canPost = normalizedRole === "student" || normalizedRole === "admin"
 
   const categories = [
@@ -73,6 +69,7 @@ export function JobsBrowser({
     "Programming",
     "English",
     "IELTS",
+    "General",
   ]
 
   const visibleJobs = jobs.filter((job) => {
@@ -102,14 +99,22 @@ export function JobsBrowser({
           </p>
         </div>
         {canPost ? (
-          <Button
-            type="button"
-            onClick={() => setAddOpen(true)}
-            className="mt-5 rounded-xl bg-brand-coral px-5 text-white hover:bg-brand-coral-deep"
-          >
-            <Plus className="size-4" />
-            Post a Job
-          </Button>
+          <div className="mt-5 flex flex-wrap gap-2">
+            <Button
+              type="button"
+              onClick={() => setAddOpen(true)}
+              className="rounded-xl bg-brand-coral px-5 text-white hover:bg-brand-coral-deep"
+            >
+              <Plus className="size-4" />
+              Post a Job
+            </Button>
+            <Link
+              href="/jobs/add-jobs"
+              className={buttonVariants({ variant: "outline" })}
+            >
+              {normalizedRole === "admin" ? "Manage jobs" : "My jobs"}
+            </Link>
+          </div>
         ) : null}
       </section>
 
@@ -161,21 +166,13 @@ export function JobsBrowser({
         </div>
       ) : visibleJobs.length ? (
         <div className="mt-5 grid gap-4 md:grid-cols-2">
-          {visibleJobs.map((job) => {
-            const canManage =
-              normalizedRole === "admin" ||
-              (normalizedRole === "student" &&
-                job.postedBy?.email?.toLowerCase() === userEmail?.toLowerCase())
-
-            return (
-              <JobCard
-                key={job._id ?? job.id ?? `${job.title}-${job.createdAt}`}
-                job={job}
-                canManage={canManage}
-                onChanged={() => void loadJobs()}
-              />
-            )
-          })}
+          {visibleJobs.map((job) => (
+            <JobCard
+              key={job._id}
+              job={job}
+              onChanged={() => void loadJobs()}
+            />
+          ))}
         </div>
       ) : (
         <div className="mt-5 rounded-2xl border border-border bg-card p-8 text-center">

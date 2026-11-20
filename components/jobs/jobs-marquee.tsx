@@ -19,7 +19,7 @@ export function JobsMarquee({ jobs }: { jobs: Job[] }) {
       <div className="flex w-max animate-[marquee_24s_linear_infinite] items-center gap-3 px-3 hover:[animation-play-state:paused]">
         {[...recentJobs, ...recentJobs].map((job, index) => (
           <div
-            key={`${job._id ?? job.id ?? job.title}-${index}`}
+            key={`${job._id}-${index}`}
             className="flex items-center gap-2 text-sm whitespace-nowrap"
           >
             <span className="font-bold text-foreground">{job.title}</span>
@@ -31,7 +31,7 @@ export function JobsMarquee({ jobs }: { jobs: Job[] }) {
                 {job.subject}
               </Badge>
             ) : null}
-            {job.salary ? (
+            {job.salary != null && job.salary !== "" ? (
               <span className="font-semibold text-brand-coral-deep">
                 ৳{job.salary}
               </span>

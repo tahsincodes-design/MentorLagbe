@@ -69,6 +69,7 @@ export function AddJobDialog({
         ...payload,
         title: payload.title.trim(),
         description: payload.description.trim(),
+        status: active ? "open" : "closed",
       })
       toast.success("Tuition posted successfully")
       setPayload(emptyPayload)
@@ -110,12 +111,12 @@ export function AddJobDialog({
               />
             </div>
             <div className="space-y-1.5">
-              <Label>Subject *</Label>
+              <Label htmlFor="job-subject">Subject</Label>
               <Select
                 value={payload.subject}
                 onValueChange={(value) => updateField("subject", String(value))}
               >
-                <SelectTrigger className="h-10 w-full">
+                <SelectTrigger id="job-subject" className="h-10 w-full">
                   <SelectValue placeholder="Select Subject" />
                 </SelectTrigger>
                 <SelectContent>
@@ -155,18 +156,19 @@ export function AddJobDialog({
 
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-1.5">
-              <Label htmlFor="job-salary">Monthly Fee (৳) *</Label>
+              <Label htmlFor="job-salary">Monthly Fee (৳)</Label>
               <Input
                 id="job-salary"
                 type="number"
                 min="0"
+                step="0.01"
                 value={payload.salary}
                 onChange={(event) => updateField("salary", event.target.value)}
                 placeholder="e.g. 2000"
               />
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="job-location">Location *</Label>
+              <Label htmlFor="job-location">Location</Label>
               <Input
                 id="job-location"
                 value={payload.location}
@@ -198,12 +200,13 @@ export function AddJobDialog({
 
           <div className="flex items-center justify-between rounded-xl border border-border px-4 py-3">
             <div>
-              <Label>Active Status</Label>
+              <Label htmlFor="new-job-active">Active Status</Label>
               <p className="mt-1 text-xs text-muted-foreground">
                 Turn off to hide this tuition temporarily.
               </p>
             </div>
             <Switch
+              id="new-job-active"
               checked={active}
               onCheckedChange={setActive}
               className="data-checked:bg-brand-coral"

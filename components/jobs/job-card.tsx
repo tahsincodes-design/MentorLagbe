@@ -1,11 +1,12 @@
 "use client"
 
 import * as React from "react"
+import Link from "next/link"
 import { Pencil, Trash2, Users } from "lucide-react"
 import { toast } from "sonner"
 
 import { deleteJob, setJobStatus } from "@/components/jobs/job-api"
-import type { Job, JobStatus } from "@/components/jobs/job-types"
+import type { Job } from "@/components/jobs/job-types"
 import { EditJobDialog } from "@/components/jobs/edit-job-dialog"
 import {
   AlertDialog,
@@ -19,31 +20,30 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
+import { Button, buttonVariants } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Switch } from "@/components/ui/switch"
 
 export function JobCard({
   job,
-  canManage,
   onChanged,
 }: {
   job: Job
-  canManage: boolean
   onChanged: () => void
 }) {
   const [editOpen, setEditOpen] = React.useState(false)
   const [deleting, setDeleting] = React.useState(false)
   const [updatingStatus, setUpdatingStatus] = React.useState(false)
   const isOpen = job.status !== "closed"
+  const jobId = job._id
+  const busy = deleting || updatingStatus
 
   async function changeStatus(checked: boolean) {
-    const jobId = job._id ?? job.id
-    if (!jobId) return
+    if (busy) return
 
     setUpdatingStatus(true)
     try {
-      await setJobStatus(jobId, (checked ? "open" : "closed") as JobStatus)
+      await setJobStatus(jobId, checked ? "open" : "closed")
       toast.success(checked ? "Job activated" : "Job closed")
       onChanged()
     } catch (statusError) {
@@ -58,8 +58,7 @@ export function JobCard({
   }
 
   async function handleDelete() {
-    const jobId = job._id ?? job.id
-    if (!jobId) return
+    if (busy) return
 
     setDeleting(true)
     try {
@@ -109,7 +108,7 @@ export function JobCard({
                 {job.description}
               </p>
               <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-muted-foreground">
-                {job.salary ? (
+                {job.salary != null && job.salary !== "" ? (
                   <span className="font-bold text-brand-coral-deep">
                     ৳{job.salary}/month
                   </span>
@@ -123,12 +122,24 @@ export function JobCard({
             </div>
           </div>
 
-          {canManage ? (
+          <Link
+            href={`/jobs/jobs/${encodeURIComponent(jobId)}`}
+            className={buttonVariants({
+              variant: "outline",
+              size: "sm",
+              className: "mt-4",
+            })}
+          >
+            {job.canManage ? "View job and applicants" : "View job details"}
+          </Link>
+
+          {job.canManage ? (
             <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-border pt-3">
               <div className="mr-auto flex items-center gap-2">
                 <Switch
                   checked={isOpen}
-                  disabled={updatingStatus}
+                  aria-label={`Active status for ${job.title}`}
+                  disabled={busy}
                   onCheckedChange={changeStatus}
                   className="data-checked:bg-brand-coral"
                 />
@@ -140,6 +151,7 @@ export function JobCard({
                 type="button"
                 variant="outline"
                 size="sm"
+                disabled={busy}
                 onClick={() => setEditOpen(true)}
                 className="rounded-lg"
               >
@@ -156,7 +168,7 @@ export function JobCard({
                       className="rounded-lg"
                     />
                   }
-                  disabled={deleting}
+                  disabled={busy}
                 >
                   <Trash2 className="size-3.5" />
                   Delete
@@ -184,13 +196,14 @@ export function JobCard({
         </CardContent>
       </Card>
 
-      <EditJobDialog
-        key={`${job._id ?? job.id ?? job.title}-${isOpen}-${job.description}`}
-        job={job}
-        open={editOpen}
-        onOpenChange={setEditOpen}
-        onUpdated={onChanged}
-      />
+      {editOpen ? (
+        <EditJobDialog
+          job={job}
+          open={editOpen}
+          onOpenChange={setEditOpen}
+          onUpdated={onChanged}
+        />
+      ) : null}
     </>
   )
 }

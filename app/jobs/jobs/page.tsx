@@ -9,6 +9,7 @@ import { useSession } from "@/lib/auth-client"
 export default function JobsPage() {
   const { data: session, isPending } = useSession()
   const user = session?.user
+  const role = user ? (user.role ?? "student") : undefined
 
   if (isPending) {
     return (
@@ -22,9 +23,9 @@ export default function JobsPage() {
         name={user?.name}
         email={user?.email}
         image={user?.image}
-        role={user?.role ?? "student"}
+        role={role}
       />
-      <JobsBrowser role={user?.role ?? "student"} userEmail={user?.email} />
+      <JobsBrowser key={user?.id ?? "guest"} role={role} />
     </div>
   )
 }

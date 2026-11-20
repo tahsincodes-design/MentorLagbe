@@ -12,12 +12,10 @@ import { Button } from "@/components/ui/button"
 
 export function PostedJobs({
   role,
-  userEmail,
   openAddJob,
   onOpenAddJobChange,
 }: {
   role: string
-  userEmail?: string
   openAddJob?: boolean
   onOpenAddJobChange?: (open: boolean) => void
 }) {
@@ -35,6 +33,7 @@ export function PostedJobs({
   const loadJobs = React.useCallback(async () => {
     try {
       setJobs(await fetchJobs())
+      setError("")
     } catch (loadError) {
       setError(
         loadError instanceof Error ? loadError.message : "Could not load jobs."
@@ -72,13 +71,7 @@ export function PostedJobs({
 
   const normalizedRole = role.toLowerCase()
   const canPost = normalizedRole === "student" || normalizedRole === "admin"
-  const visibleJobs =
-    normalizedRole === "admin"
-      ? jobs
-      : jobs.filter(
-          (job) =>
-            job.postedBy?.email?.toLowerCase() === userEmail?.toLowerCase()
-        )
+  const visibleJobs = jobs.filter((job) => job.canManage)
 
   return (
     <main className="min-w-0 flex-1 px-4 py-5 sm:px-6 lg:px-8">
@@ -131,11 +124,8 @@ export function PostedJobs({
         <div className="mt-5 grid gap-4 md:grid-cols-2">
           {visibleJobs.map((job) => (
             <JobCard
-              key={job._id ?? job.id ?? `${job.title}-${job.createdAt}`}
+              key={job._id}
               job={job}
-              canManage={
-                normalizedRole === "admin" || normalizedRole === "student"
-              }
               onChanged={() => void loadJobs()}
             />
           ))}
