@@ -4,12 +4,13 @@ import { Mail, MapPin, Phone } from "lucide-react"
 import { BrandLogo } from "@/components/site/brand-logo"
 import { publicNavigation } from "@/components/site/navigation"
 import { Separator } from "@/components/ui/separator"
+import { contactInbox } from "@/lib/contact"
 import { cn } from "@/lib/utils"
 
 const contacts = [
   {
-    label: "hello@mentorlagbe.com",
-    href: "mailto:hello@mentorlagbe.com",
+    label: contactInbox,
+    href: `mailto:${contactInbox}`,
     icon: Mail,
   },
   { label: "+880 1234 567890", href: "tel:+8801234567890", icon: Phone },

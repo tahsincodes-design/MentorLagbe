@@ -1,10 +1,9 @@
 import type { Metadata } from "next"
-import { Mail } from "lucide-react"
 
 import { AboutHero } from "@/components/about/about-hero"
 import { AboutOverview } from "@/components/about/about-overview"
+import { ContactDialog } from "@/components/about/contact-dialog"
 import { SiteFooter } from "@/components/site/site-footer"
-import { buttonVariants } from "@/components/ui/button"
 
 export const metadata: Metadata = {
   title: "About MentorLagbe",
@@ -28,16 +27,7 @@ export default function AboutPage() {
           >
             Have a question about MentorLagbe?
           </h2>
-          <a
-            href="mailto:hello@mentorlagbe.com"
-            className={buttonVariants({
-              variant: "outline",
-              className: "rounded-full",
-            })}
-          >
-            <Mail aria-hidden="true" className="size-4" />
-            Email us
-          </a>
+          <ContactDialog />
         </section>
       </main>
       <SiteFooter />
