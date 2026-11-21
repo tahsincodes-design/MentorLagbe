@@ -22,6 +22,10 @@ export function readJobDetails(jobId: string, headers: Headers) {
   return requestJobs("GET", `/${encodeURIComponent(jobId)}`, headers)
 }
 
+export function readMyApplications(headers: Headers) {
+  return requestJobs("GET", "/applications", headers)
+}
+
 async function requestJobs(
   method: string,
   path: string,
@@ -29,8 +33,10 @@ async function requestJobs(
   readBody?: () => Promise<unknown>,
   dashboard = false
 ) {
+  const applicationHistory = path === "/applications"
   if (
     path &&
+    !applicationHistory &&
     !/^\/[a-f\d]{24}(?:\/approval|\/applications(?:\/[a-f\d]{24})?)?$/i.test(
       path
     )
@@ -43,8 +49,14 @@ async function requestJobs(
   const readOnly = method === "GET"
   try {
     const session = await auth.api.getSession({ headers: requestHeaders })
-    if (!readOnly && !session)
+    if ((!readOnly || applicationHistory) && !session)
       return errorResponse(401, "Please sign in to continue.")
+    if (
+      applicationHistory &&
+      (session?.user.role ?? "student").toLowerCase() !== "student"
+    ) {
+      return errorResponse(403, "Only students can view this page.")
+    }
 
     const adminNeedsCode =
       session?.user.role?.toLowerCase() === "admin" &&

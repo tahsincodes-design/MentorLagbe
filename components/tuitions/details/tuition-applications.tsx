@@ -5,19 +5,17 @@ import Link from "next/link"
 import { useRouter } from "next/navigation"
 
 import { applyForJob, reviewJobApplication } from "@/lib/tuitions/api"
-import type { ApplicationStatus, JobApplication } from "@/lib/tuitions/types"
+import {
+  applicationStatusLabels,
+  type ApplicationStatus,
+  type JobApplication,
+} from "@/lib/tuitions/types"
 import { Badge } from "@/components/ui/badge"
 import { Button, buttonVariants } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { useSession } from "@/lib/auth-client"
-import { tuitionDetailPath } from "@/lib/tuitions/routes"
-
-const statusLabel: Record<ApplicationStatus, string> = {
-  pending: "Pending review",
-  accepted: "Accepted",
-  rejected: "Declined",
-}
+import { myApplicationsPath, tuitionDetailPath } from "@/lib/tuitions/routes"
 
 export function TuitionApplications({
   jobId,
@@ -98,7 +96,9 @@ export function TuitionApplications({
                 <li key={applicant._id} className="rounded-xl border p-4">
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <p className="font-semibold">{applicant.name}</p>
-                    <Badge variant="secondary">{statusLabel[decision]}</Badge>
+                    <Badge variant="secondary">
+                      {applicationStatusLabels[decision]}
+                    </Badge>
                   </div>
                   <p className="mt-2 text-sm wrap-break-word whitespace-pre-wrap text-muted-foreground">
                     {applicant.message}
@@ -132,13 +132,24 @@ export function TuitionApplications({
           </p>
         )
       ) : status ? (
-        <p
-          role="status"
-          className="mt-3 flex flex-wrap items-center gap-2 text-sm"
-        >
-          Application submitted
-          <Badge variant="secondary">{statusLabel[status]}</Badge>
-        </p>
+        <>
+          <p
+            role="status"
+            className="mt-3 flex flex-wrap items-center gap-2 text-sm"
+          >
+            Application submitted
+            <Badge variant="secondary">{applicationStatusLabels[status]}</Badge>
+          </p>
+          <Link
+            href={myApplicationsPath}
+            className={buttonVariants({
+              variant: "outline",
+              className: "mt-4",
+            })}
+          >
+            My applications
+          </Link>
+        </>
       ) : closed ? (
         <p className="mt-3 text-sm text-muted-foreground">
           This tuition is closed to applications.

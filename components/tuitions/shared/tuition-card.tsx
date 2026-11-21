@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import Link from "next/link"
-import { Pencil, Trash2, Users } from "lucide-react"
+import { ArrowUpRight, MapPin, Pencil, Trash2, UserRound } from "lucide-react"
 import { toast } from "sonner"
 
 import { deleteJob, setJobStatus } from "@/lib/tuitions/api"
@@ -24,6 +24,9 @@ import { Badge } from "@/components/ui/badge"
 import { Button, buttonVariants } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Switch } from "@/components/ui/switch"
+import { cn } from "@/lib/utils"
+
+const feeFormatter = new Intl.NumberFormat("en-BD")
 
 export function TuitionCard({
   job,
@@ -38,6 +41,10 @@ export function TuitionCard({
   const isOpen = job.isActive
   const jobId = job._id
   const busy = deleting || updatingStatus
+  const fee =
+    typeof job.salary === "number"
+      ? feeFormatter.format(job.salary)
+      : job.salary
 
   async function changeStatus(checked: boolean) {
     if (busy) return
@@ -79,65 +86,66 @@ export function TuitionCard({
 
   return (
     <>
-      <Card className="gap-0 rounded-2xl py-0 transition-shadow hover:shadow-lg">
-        <CardContent className="p-4 sm:p-5">
-          <div className="flex items-start gap-3">
-            <div className="grid size-11 shrink-0 place-items-center rounded-xl bg-brand-navy text-brand-cream">
-              <span className="text-lg font-extrabold">
-                {(job.subject ?? job.title).slice(0, 1).toUpperCase()}
-              </span>
-            </div>
-            <div className="min-w-0 flex-1">
-              <div className="flex flex-wrap items-center gap-2">
-                <h3 className="text-base font-extrabold">{job.title}</h3>
-                <Badge
-                  className={
-                    isOpen
-                      ? "rounded-full bg-brand-coral/10 text-brand-coral-deep"
-                      : "rounded-full bg-muted text-muted-foreground"
-                  }
-                >
-                  {isOpen ? "Active" : "Paused"}
+      <Card className="h-full gap-0 rounded-2xl py-0 transition-shadow hover:shadow-md">
+        <CardContent className="flex h-full flex-col p-4 sm:p-5">
+          <div className="flex flex-wrap items-center gap-2">
+            {job.subject ? (
+              <Badge
+                variant="secondary"
+                className="h-auto max-w-full rounded-full wrap-anywhere whitespace-normal"
+              >
+                {job.subject}
+              </Badge>
+            ) : null}
+            {job.canManage || job.canModerate ? (
+              <>
+                <Badge variant="outline">
+                  {approvalLabels[job.approvalStatus]}
                 </Badge>
-                {job.canManage || job.canModerate ? (
-                  <Badge variant="outline">
-                    {approvalLabels[job.approvalStatus]}
-                  </Badge>
-                ) : null}
-              </div>
-              {job.subject ? (
-                <p className="mt-1 text-xs font-semibold text-brand-coral-deep">
-                  {job.subject}
-                </p>
-              ) : null}
-              <p className="mt-2 line-clamp-2 text-sm leading-5 text-muted-foreground">
-                {job.description}
-              </p>
-              <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-muted-foreground">
-                {job.salary != null && job.salary !== "" ? (
-                  <span className="font-bold text-brand-coral-deep">
-                    ৳{job.salary}/month
-                  </span>
-                ) : null}
-                {job.location ? <span>{job.location}</span> : null}
-                <span className="flex items-center gap-1">
-                  <Users className="size-3.5" />
-                  {job.postedBy?.name ?? "Tutor"}
-                </span>
-              </div>
-            </div>
+                <Badge variant="outline">{isOpen ? "Active" : "Paused"}</Badge>
+              </>
+            ) : null}
           </div>
-
-          <Link
-            href={tuitionDetailPath(jobId)}
-            className={buttonVariants({
-              variant: "outline",
-              size: "sm",
-              className: "mt-4",
-            })}
-          >
-            {job.canModerate ? "Review tuition" : "View tuition details"}
-          </Link>
+          <h3 className="mt-2 text-lg font-bold tracking-tight wrap-anywhere">
+            {job.title}
+          </h3>
+          <dl className="mt-3 grid grid-cols-2 gap-3 rounded-xl border bg-muted/30 px-3 py-2.5">
+            <div className="min-w-0">
+              <dt className="text-xs text-muted-foreground">Monthly fee</dt>
+              <dd className="mt-0.5 text-sm font-semibold wrap-anywhere tabular-nums">
+                {fee ? `৳${fee}` : "Not listed"}
+              </dd>
+            </div>
+            <div className="min-w-0">
+              <dt className="text-xs text-muted-foreground">Location</dt>
+              <dd className="mt-0.5 flex items-start gap-1 text-sm font-semibold wrap-anywhere">
+                <MapPin
+                  aria-hidden="true"
+                  className="mt-0.5 size-3.5 shrink-0 text-muted-foreground"
+                />
+                <span className="min-w-0">{job.location || "Not listed"}</span>
+              </dd>
+            </div>
+          </dl>
+          <p className="mt-3 mb-4 line-clamp-2 text-sm leading-5 wrap-anywhere text-muted-foreground">
+            {job.description}
+          </p>
+          <div className="mt-auto flex flex-wrap items-center justify-between gap-3">
+            <span className="inline-flex min-w-0 items-center gap-1.5 text-sm wrap-anywhere text-muted-foreground">
+              <UserRound aria-hidden="true" className="size-4 shrink-0" />
+              <span className="min-w-0">{job.postedBy?.name || "Tutor"}</span>
+            </span>
+            <Link
+              href={tuitionDetailPath(jobId)}
+              className={cn(
+                buttonVariants({ variant: "outline" }),
+                "h-9 rounded-full px-3"
+              )}
+            >
+              {job.canModerate ? "Review tuition" : "View tuition details"}
+              <ArrowUpRight aria-hidden="true" className="size-4" />
+            </Link>
+          </div>
 
           {job.canManage ? (
             <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-border pt-3">

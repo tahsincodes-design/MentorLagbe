@@ -35,6 +35,22 @@ export type JobPayload = {
 
 export type ApplicationStatus = "pending" | "accepted" | "rejected"
 
+export const applicationStatusLabels: Record<ApplicationStatus, string> = {
+  pending: "Pending review",
+  accepted: "Accepted",
+  rejected: "Declined",
+}
+
+export type StudentApplication = {
+  _id: string
+  tuitionId: string
+  title: string | null
+  tutorName: string | null
+  status: ApplicationStatus
+  createdAt?: string | null
+  available: boolean
+}
+
 export type JobApplication = {
   _id: string
   name: string

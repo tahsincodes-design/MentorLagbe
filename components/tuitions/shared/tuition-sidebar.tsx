@@ -4,6 +4,7 @@ import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import {
   BriefcaseBusiness,
+  ClipboardList,
   LayoutDashboard,
   UserRound,
   Plus,
@@ -14,7 +15,11 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { signOut } from "@/lib/auth-client"
 import { cn } from "@/lib/utils"
-import { tuitionBrowsePath, tuitionManagePath } from "@/lib/tuitions/routes"
+import {
+  myApplicationsPath,
+  tuitionBrowsePath,
+  tuitionManagePath,
+} from "@/lib/tuitions/routes"
 import { isTutorRole } from "@/components/auth/roles"
 
 type TuitionSidebarProps = {
@@ -51,6 +56,15 @@ export function TuitionSidebar({
             label: isAdmin ? "Tuition approvals" : "My tuitions",
             href: tuitionManagePath,
             icon: BriefcaseBusiness,
+          },
+        ]
+      : []),
+    ...(normalizedRole === "student"
+      ? [
+          {
+            label: "My applications",
+            href: myApplicationsPath,
+            icon: ClipboardList,
           },
         ]
       : []),

@@ -6,7 +6,6 @@ import { useRouter } from "next/navigation"
 import {
   ArrowRight,
   BarChart3,
-  Bookmark,
   CalendarDays,
   Camera,
   CheckCircle2,
@@ -31,7 +30,7 @@ import { Button, buttonVariants } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { useSession } from "@/lib/auth-client"
 import { cn } from "@/lib/utils"
-import { tuitionBrowsePath } from "@/lib/tuitions/routes"
+import { myApplicationsPath, tuitionBrowsePath } from "@/lib/tuitions/routes"
 
 type AccountStats = {
   totalApplied: number
@@ -54,9 +53,15 @@ const quickActions: {
   label: string
   href: string
   icon: LucideIcon
+  studentOnly?: boolean
 }[] = [
   { label: "Browse Tuitions", href: tuitionBrowsePath, icon: Search },
-  { label: "View Saved Tuitions", href: "/#saved-tuitions", icon: Bookmark },
+  {
+    label: "My Applications",
+    href: myApplicationsPath,
+    icon: FileText,
+    studentOnly: true,
+  },
   { label: "Upgrade to Pro", href: "/#pricing", icon: Crown },
 ]
 
@@ -256,21 +261,27 @@ export default function ProfilePage() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="flex flex-col gap-1">
-                {quickActions.map((action) => {
-                  const Icon = action.icon
-
-                  return (
-                    <Link
-                      key={action.label}
-                      href={action.href}
-                      className="group flex items-center gap-3 rounded-xl px-2 py-2.5 text-sm font-semibold transition-colors hover:bg-muted/60"
-                    >
-                      <Icon className="size-4 text-muted-foreground" />
-                      <span className="flex-1">{action.label}</span>
-                      <ArrowRight className="size-4 text-muted-foreground transition-transform group-hover:translate-x-0.5" />
-                    </Link>
+                {quickActions
+                  .filter(
+                    (action) =>
+                      !action.studentOnly ||
+                      (user.role ?? "student").toLowerCase() === "student"
                   )
-                })}
+                  .map((action) => {
+                    const Icon = action.icon
+
+                    return (
+                      <Link
+                        key={action.label}
+                        href={action.href}
+                        className="group flex items-center gap-3 rounded-xl px-2 py-2.5 text-sm font-semibold transition-colors hover:bg-muted/60"
+                      >
+                        <Icon className="size-4 text-muted-foreground" />
+                        <span className="flex-1">{action.label}</span>
+                        <ArrowRight className="size-4 text-muted-foreground transition-transform group-hover:translate-x-0.5" />
+                      </Link>
+                    )
+                  })}
               </CardContent>
             </Card>
           </div>

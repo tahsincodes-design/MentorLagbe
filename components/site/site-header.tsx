@@ -21,7 +21,11 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { signOut, useSession } from "@/lib/auth-client"
-import { tuitionBrowsePath, tuitionManagePath } from "@/lib/tuitions/routes"
+import {
+  myApplicationsPath,
+  tuitionBrowsePath,
+  tuitionManagePath,
+} from "@/lib/tuitions/routes"
 import { cn } from "@/lib/utils"
 
 const signInClassName = cn(
@@ -42,16 +46,18 @@ export function SiteHeader() {
   const user = session?.user
   const isAdmin = user?.role?.toLowerCase() === "admin"
   const isTutor = isTutorRole(user?.role)
-  const navigation =
+  const roleLink =
     isAdmin || isTutor
-      ? [
-          ...publicNavigation,
-          {
-            label: isAdmin ? "Tuition Approvals" : "My Tuitions",
-            href: tuitionManagePath,
-          },
-        ]
-      : publicNavigation
+      ? {
+          label: isAdmin ? "Tuition Approvals" : "My Tuitions",
+          href: tuitionManagePath,
+        }
+      : user && (user.role ?? "student").toLowerCase() === "student"
+        ? { label: "My Applications", href: myApplicationsPath }
+        : null
+  const navigation = roleLink
+    ? [...publicNavigation, roleLink]
+    : publicNavigation
 
   function isActive(href: string) {
     return (
