@@ -2,13 +2,12 @@
 
 import * as React from "react"
 import {
-  CalendarCheck,
+  ClipboardCheck,
   ChevronLeft,
   ChevronRight,
-  Clock,
-  CreditCard,
+  FileText,
   Search,
-  Trophy,
+  UsersRound,
   type LucideIcon,
 } from "lucide-react"
 
@@ -20,49 +19,39 @@ type Step = {
   title: string
   description: string
   detail: string
-  duration: string
-  tags: string[]
   icon: LucideIcon
 }
 
 const steps: Step[] = [
   {
     number: "01",
-    title: "Search & Explore",
+    title: "Browse tuitions",
     description: "Find the right tutor for your goals.",
     detail:
-      "Compare subjects, experience, reviews, and tuition types before you decide.",
-    duration: "2 min",
-    tags: ["Subjects", "Experience", "Reviews"],
+      "Narrow down approved listings by subject, location, and monthly fee.",
     icon: Search,
   },
   {
     number: "02",
-    title: "Apply or Enroll",
-    description: "Choose a session or join a tuition batch.",
-    detail: "Check the schedule and send your request in a few clicks.",
-    duration: "3 min",
-    tags: ["Online", "In-person", "Batch"],
-    icon: CalendarCheck,
+    title: "Apply as a student",
+    description: "Tell the tutor what you want to learn.",
+    detail: "Sign in with a student account to apply from the tuition page.",
+    icon: FileText,
   },
   {
     number: "03",
-    title: "Choose Your Plan",
-    description: "Pick the learning option that fits you.",
+    title: "The tutor reviews your request",
+    description: "Your application starts as Pending review.",
     detail:
-      "Start with a basic plan or unlock more features with Stripe anytime.",
-    duration: "1 min",
-    tags: ["Basic", "Monthly", "Upgradeable"],
-    icon: CreditCard,
+      "The tutor reads your message and accepts or declines your request.",
+    icon: UsersRound,
   },
   {
     number: "04",
-    title: "Start Learning",
-    description: "Learn with guidance from expert tutors.",
-    detail: "Track progress and build confidence with every lesson.",
-    duration: "Ongoing",
-    tags: ["Live lessons", "Tasks", "Progress"],
-    icon: Trophy,
+    title: "Check your application",
+    description: "See the latest decision in My Applications.",
+    detail: "You can find all your submitted applications in one place.",
+    icon: ClipboardCheck,
   },
 ]
 
@@ -252,17 +241,6 @@ export function HowItWorks() {
                               >
                                 Step {step.number}
                               </span>
-                              <span
-                                className={cn(
-                                  "inline-flex shrink-0 items-center gap-1 rounded-full px-2 py-0.5 text-[0.65rem] font-semibold",
-                                  isActive
-                                    ? "bg-brand-cream/10 text-brand-cream dark:bg-brand-navy/10 dark:text-brand-navy"
-                                    : "bg-muted text-muted-foreground"
-                                )}
-                              >
-                                <Clock className="size-3" />
-                                {step.duration}
-                              </span>
                             </div>
 
                             <h3 className="mt-1 text-lg font-extrabold sm:text-xl">
@@ -288,22 +266,6 @@ export function HowItWorks() {
                             >
                               {step.detail}
                             </p>
-
-                            <ul className="mt-3 flex flex-wrap gap-1.5">
-                              {step.tags.map((tag) => (
-                                <li
-                                  key={tag}
-                                  className={cn(
-                                    "rounded-full border px-2.5 py-0.5 text-[0.65rem] font-semibold",
-                                    isActive
-                                      ? "border-brand-cream/25 bg-brand-cream/10 text-brand-cream dark:border-brand-navy/20 dark:bg-brand-navy/10 dark:text-brand-navy"
-                                      : "border-border bg-muted/60 text-muted-foreground"
-                                  )}
-                                >
-                                  {tag}
-                                </li>
-                              ))}
-                            </ul>
                           </div>
                         </CardContent>
                       </Card>

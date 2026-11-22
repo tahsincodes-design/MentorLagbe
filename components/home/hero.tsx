@@ -13,6 +13,7 @@ import {
 import { Badge } from "@/components/ui/badge"
 import { buttonVariants } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
+import { howItWorksPath } from "@/components/site/navigation"
 import { tuitionBrowsePath } from "@/lib/tuitions/routes"
 import { cn } from "@/lib/utils"
 
@@ -72,7 +73,7 @@ export function Hero() {
               <ArrowRight className="size-4" />
             </Link>
             <Link
-              href="/#how-it-works"
+              href={howItWorksPath}
               className={cn(
                 buttonVariants({ variant: "ghost", size: "lg" }),
                 "h-11 rounded-full px-4 text-foreground hover:bg-foreground/5"
