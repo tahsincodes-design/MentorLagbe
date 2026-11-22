@@ -116,7 +116,7 @@ function ApplicationCard({ application }: { application: StudentApplication }) {
   const date = application.createdAt ? new Date(application.createdAt) : null
 
   return (
-    <Card className="gap-0 rounded-2xl py-0">
+    <Card className="card-elevation gap-0 rounded-2xl py-0">
       <CardContent className="flex flex-wrap items-center justify-between gap-4 p-4 sm:p-5">
         <div className="min-w-0 grow">
           <div className="flex flex-wrap items-center gap-x-3 gap-y-2">

@@ -100,7 +100,7 @@ export function TuitionCard({
 
   return (
     <>
-      <Card className="h-full gap-0 rounded-2xl py-0 transition-shadow hover:shadow-md motion-safe:transition-[translate,box-shadow] motion-safe:hover:-translate-y-0.5">
+      <Card className="h-full card-elevation gap-0 rounded-2xl py-0">
         <CardContent className="flex h-full flex-col p-4 sm:p-5">
           <div className="flex items-start justify-between gap-2">
             <div className="flex min-w-0 flex-wrap items-center gap-2">
@@ -182,7 +182,7 @@ export function TuitionCard({
               href={tuitionDetailPath(jobId) + browseQuery}
               className={cn(
                 buttonVariants({ variant: "outline" }),
-                "h-9 rounded-full px-3"
+                "group/details h-9 rounded-full px-3"
               )}
             >
               {job.canModerate
@@ -190,7 +190,10 @@ export function TuitionCard({
                 : job.canManage && pending > 0
                   ? "Review applications"
                   : "View tuition details"}
-              <ArrowUpRight aria-hidden="true" className="size-4" />
+              <ArrowUpRight
+                aria-hidden="true"
+                className="size-4 motion-safe:transition-transform motion-safe:group-hover/details:translate-x-0.5 motion-safe:group-hover/details:-translate-y-0.5"
+              />
             </Link>
           </div>
 

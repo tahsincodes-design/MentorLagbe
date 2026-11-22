@@ -106,7 +106,7 @@ export default async function MembershipPage({
           </p>
         ) : null}
         <div className="mt-6 grid gap-4 sm:grid-cols-2">
-          <section className="flex flex-col gap-4 rounded-[2rem] border bg-card p-6 sm:p-8">
+          <section className="flex card-elevation flex-col gap-4 rounded-[2rem] border bg-card p-6 sm:p-8">
             <h2 className="text-2xl font-bold">Free</h2>
             <p className="text-4xl font-extrabold tracking-tight">
               No monthly fee
@@ -143,7 +143,7 @@ export default async function MembershipPage({
             )}
           </section>
 
-          <section className="flex flex-col gap-4 rounded-[2rem] border border-brand-coral/35 bg-brand-navy bg-[radial-gradient(ellipse_at_top_left,#2d3f66_0%,transparent_75%)] p-6 text-brand-cream sm:p-8">
+          <section className="flex card-elevation flex-col gap-4 rounded-[2rem] border border-brand-coral/35 bg-brand-navy bg-[radial-gradient(ellipse_at_top_left,#2d3f66_0%,transparent_75%)] p-6 text-brand-cream sm:p-8">
             <h2 className="flex flex-wrap items-center gap-3 text-2xl font-bold">
               MentorLagbe Pro
               {premium ? (

@@ -1,5 +1,4 @@
-import Link from "next/link"
-
+import { SiteNavigationLink } from "@/components/site/site-navigation-link"
 import { cn } from "@/lib/utils"
 
 function BrandMark({
@@ -52,7 +51,7 @@ export function BrandLogo({
   onClick?: () => void
 }) {
   return (
-    <Link
+    <SiteNavigationLink
       href="/"
       onClick={onClick}
       aria-label="MentorLagbe home"
@@ -70,6 +69,6 @@ export function BrandLogo({
       >
         Mentor<span className="text-brand-coral">Lagbe</span>
       </span>
-    </Link>
+    </SiteNavigationLink>
   )
 }

@@ -135,6 +135,11 @@
   }
 }
 
+@utility card-elevation {
+  @apply shadow-sm shadow-brand-navy/10 focus-within:shadow-md focus-within:ring-brand-coral/25 hover:shadow-lg hover:shadow-brand-navy/15 dark:shadow-black/25 dark:hover:shadow-black/40;
+  @apply motion-safe:transition-[box-shadow,translate] motion-safe:duration-200 motion-safe:ease-out motion-safe:hover:-translate-y-0.5;
+}
+
 @keyframes marquee {
   from {
     transform: translateX(0);

@@ -23,7 +23,7 @@ export function AboutOverview() {
           {audiences.map(({ title, description, icon: Icon }) => (
             <article
               key={title}
-              className="rounded-3xl border bg-card p-5 sm:p-6"
+              className="card-elevation rounded-3xl border bg-card p-5 sm:p-6"
             >
               <div className="grid size-11 place-items-center rounded-2xl bg-brand-coral/15 text-brand-navy dark:text-brand-cream">
                 <Icon aria-hidden="true" className="size-5" />

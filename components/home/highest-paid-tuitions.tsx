@@ -1,12 +1,13 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 import Link from "next/link"
 import { ArrowUpRight, Banknote } from "lucide-react"
 
 import { TuitionCard } from "@/components/tuitions/shared/tuition-card"
 import { Button, buttonVariants } from "@/components/ui/button"
 import { useSession } from "@/lib/auth-client"
+import { homeRefreshEvent } from "@/lib/home-navigation"
 import { fetchHighestPaidTuitions } from "@/lib/tuitions/api"
 import { tuitionBrowsePath } from "@/lib/tuitions/routes"
 import type { Job } from "@/lib/tuitions/types"
@@ -41,10 +42,15 @@ function HighestPaidListings() {
     }
   }, [attempt])
 
-  function reload() {
+  const reload = useCallback(() => {
     setFailed(false)
     setAttempt((count) => count + 1)
-  }
+  }, [])
+
+  useEffect(() => {
+    window.addEventListener(homeRefreshEvent, reload)
+    return () => window.removeEventListener(homeRefreshEvent, reload)
+  }, [reload])
 
   return (
     <section

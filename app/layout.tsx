@@ -1,6 +1,7 @@
 import { Caveat, Geist, Geist_Mono } from "next/font/google"
 
 import "./globals.css"
+import { PageTransition } from "@/components/site/page-transition"
 import { SiteHeader } from "@/components/site/site-header"
 import { ThemeProvider } from "@/components/theme-provider"
 import { Toaster } from "@/components/ui/sonner"
@@ -38,7 +39,7 @@ export default function RootLayout({
       <body>
         <ThemeProvider>
           <SiteHeader />
-          {children}
+          <PageTransition>{children}</PageTransition>
           <Toaster position="top-right" />
         </ThemeProvider>
       </body>

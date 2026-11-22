@@ -8,6 +8,7 @@ import { ChevronDown, LogOut, Menu, User, X } from "lucide-react"
 import { BrandLogo } from "@/components/site/brand-logo"
 import { isTutorRole } from "@/components/auth/roles"
 import { publicNavigation } from "@/components/site/navigation"
+import { SiteNavigationLink } from "@/components/site/site-navigation-link"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button, buttonVariants } from "@/components/ui/button"
@@ -96,7 +97,7 @@ export function SiteHeader() {
                 const active = isActive(item.href)
 
                 return (
-                  <Link
+                  <SiteNavigationLink
                     key={item.href}
                     href={item.href}
                     aria-current={active ? "page" : undefined}
@@ -116,7 +117,7 @@ export function SiteHeader() {
                           : "scale-x-0 group-hover:scale-x-100"
                       )}
                     />
-                  </Link>
+                  </SiteNavigationLink>
                 )
               })}
             </nav>
@@ -223,7 +224,7 @@ export function SiteHeader() {
                 const active = isActive(item.href)
 
                 return (
-                  <Link
+                  <SiteNavigationLink
                     key={item.href}
                     href={item.href}
                     aria-current={active ? "page" : undefined}
@@ -236,7 +237,7 @@ export function SiteHeader() {
                     )}
                   >
                     {item.label}
-                  </Link>
+                  </SiteNavigationLink>
                 )
               })}
             </nav>

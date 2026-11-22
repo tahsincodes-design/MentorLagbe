@@ -136,7 +136,7 @@ export default function HowItWorksPage() {
                 key={id}
                 id={id}
                 aria-labelledby={`${id}-heading`}
-                className="flex scroll-mt-24 flex-col rounded-3xl border bg-card p-5 sm:p-7"
+                className="flex card-elevation scroll-mt-24 flex-col rounded-3xl border bg-card p-5 sm:p-7"
               >
                 <h2
                   id={`${id}-heading`}
