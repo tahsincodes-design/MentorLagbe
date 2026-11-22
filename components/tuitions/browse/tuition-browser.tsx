@@ -2,23 +2,83 @@
 
 import * as React from "react"
 import Link from "next/link"
-import { Search } from "lucide-react"
+import { useSearchParams } from "next/navigation"
+import { Search, SlidersHorizontal } from "lucide-react"
 
 import { isTutorRole } from "@/components/auth/roles"
+import {
+  TuitionFilters,
+  tuitionSelectClass,
+} from "@/components/tuitions/browse/tuition-filters"
 import { fetchJobs } from "@/lib/tuitions/api"
 import type { Job } from "@/lib/tuitions/types"
 import { TuitionCard } from "@/components/tuitions/shared/tuition-card"
 import { TuitionMarquee } from "@/components/tuitions/shared/tuition-marquee"
-import { buttonVariants } from "@/components/ui/button"
+import { Button, buttonVariants } from "@/components/ui/button"
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
-import { tuitionManagePath } from "@/lib/tuitions/routes"
+import { tuitionBrowsePath, tuitionManagePath } from "@/lib/tuitions/routes"
+import {
+  readTuitionSearch,
+  searchTuitions,
+  tuitionFilterOptions,
+  tuitionSearchQuery,
+  tuitionSortOptions,
+  type TuitionSearch,
+} from "@/lib/tuitions/search"
+import { cn } from "@/lib/utils"
+
+const searchChangedEvent = "tuition-search-changed"
+
+function subscribeToSearch(onChange: () => void) {
+  window.addEventListener(searchChangedEvent, onChange)
+  window.addEventListener("popstate", onChange)
+  return () => {
+    window.removeEventListener(searchChangedEvent, onChange)
+    window.removeEventListener("popstate", onChange)
+  }
+}
+
+function getLocationSearch() {
+  return window.location.search
+}
+
+function replaceSearch(query: string) {
+  window.history.replaceState(null, "", tuitionBrowsePath + query)
+  window.dispatchEvent(new Event(searchChangedEvent))
+}
 
 export function TuitionBrowser({ role }: { role?: string }) {
   const [jobs, setJobs] = React.useState<Job[]>([])
-  const [search, setSearch] = React.useState("")
-  const [category, setCategory] = React.useState("")
   const [loading, setLoading] = React.useState(true)
   const [error, setError] = React.useState("")
+  const routeSearch = useSearchParams()
+  const locationSearch = React.useSyncExternalStore(
+    subscribeToSearch,
+    getLocationSearch,
+    () => routeSearch.toString()
+  )
+  const filters = readTuitionSearch(new URLSearchParams(locationSearch))
+  const query = tuitionSearchQuery(filters)
+
+  function updateFilter(field: keyof TuitionSearch, value: string) {
+    const params = new URLSearchParams(window.location.search)
+    params.set(field, value)
+    const next = tuitionSearchQuery(readTuitionSearch(params))
+    replaceSearch(next)
+  }
+
+  function clearFilters() {
+    replaceSearch("")
+  }
 
   const loadJobs = React.useCallback(async () => {
     try {
@@ -64,23 +124,16 @@ export function TuitionBrowser({ role }: { role?: string }) {
   const normalizedRole = role?.toLowerCase()
   const showMarquee = normalizedRole === "student" || normalizedRole === "admin"
   const hasDashboard = isTutorRole(normalizedRole) || normalizedRole === "admin"
-  const subjects = new Map(
-    jobs.flatMap(({ subject }) =>
-      subject ? [[subject.toLowerCase(), subject] as const] : []
-    )
-  )
-  const categories = [["", "All"] as const, ...subjects]
-
-  const visibleJobs = jobs.filter((job) => {
-    const matchesSearch =
-      !search ||
-      `${job.title} ${job.description} ${job.subject ?? ""}`
-        .toLowerCase()
-        .includes(search.toLowerCase())
-    const matchesCategory =
-      !subjects.has(category) || (job.subject ?? "").toLowerCase() === category
-    return matchesSearch && matchesCategory
-  })
+  const visibleJobs = searchTuitions(jobs, filters)
+  const activeFilterCount =
+    [filters.subject, filters.location].filter(Boolean).length +
+    Number(Boolean(filters.min || filters.max))
+  const filterProps = {
+    filters,
+    subjects: tuitionFilterOptions(jobs, "subject"),
+    locations: tuitionFilterOptions(jobs, "location"),
+    onChange: updateFilter,
+  }
 
   return (
     <main className="min-w-0 flex-1 px-4 py-5 sm:px-6 lg:px-8">
@@ -110,38 +163,77 @@ export function TuitionBrowser({ role }: { role?: string }) {
 
       {showMarquee ? <TuitionMarquee jobs={jobs} /> : null}
 
-      <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center">
-        <div className="relative flex-1">
-          <Search className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            value={search}
-            onChange={(event) => setSearch(event.target.value)}
-            placeholder="Search tuitions"
-            aria-label="Search tuitions"
-            className="h-10 rounded-xl pl-9"
-          />
+      <section
+        aria-label="Tuition search"
+        className="mt-5 grid gap-3 rounded-2xl border bg-card p-3 sm:p-4"
+      >
+        <div className="flex items-center gap-2">
+          <div className="relative min-w-0 flex-1">
+            <Search
+              aria-hidden="true"
+              className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground"
+            />
+            <Input
+              type="search"
+              maxLength={160}
+              value={filters.q}
+              onChange={(event) => updateFilter("q", event.target.value)}
+              placeholder="Search tuitions"
+              aria-label="Search tuitions"
+              className="h-10 rounded-xl pl-9"
+            />
+          </div>
+          <Dialog>
+            <DialogTrigger
+              render={
+                <Button variant="outline" className="h-10 shrink-0 sm:hidden" />
+              }
+            >
+              <SlidersHorizontal aria-hidden="true" className="size-4" />
+              Filters{activeFilterCount ? ` (${activeFilterCount})` : ""}
+            </DialogTrigger>
+            <DialogContent className="top-auto bottom-0 max-h-[90dvh] max-w-none translate-y-0 overflow-y-auto rounded-t-2xl rounded-b-none pb-[max(1rem,env(safe-area-inset-bottom))]">
+              <DialogHeader>
+                <DialogTitle>Filter tuitions</DialogTitle>
+              </DialogHeader>
+              <TuitionFilters {...filterProps} />
+              <DialogFooter>
+                <DialogClose render={<Button />}>Done</DialogClose>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
         </div>
-      </div>
-
-      <div className="mt-3 flex gap-2 overflow-x-auto pb-2">
-        {categories.map(([value, label]) => (
-          <button
-            key={value}
-            type="button"
-            onClick={() => setCategory(value)}
-            aria-pressed={
-              category === value || (!value && !subjects.has(category))
-            }
-            className={`shrink-0 rounded-full border px-4 py-2 text-xs font-bold transition-colors ${
-              category === value || (!value && !subjects.has(category))
-                ? "border-brand-coral bg-brand-coral text-white"
-                : "border-border bg-card text-muted-foreground hover:border-brand-coral/40 hover:text-foreground"
-            }`}
-          >
-            {label}
-          </button>
-        ))}
-      </div>
+        <TuitionFilters
+          {...filterProps}
+          className="hidden sm:grid sm:grid-cols-4"
+        />
+        <div className="flex flex-wrap items-center justify-between gap-2 border-t pt-3">
+          <p role="status" className="text-sm text-muted-foreground">
+            {!loading && !error
+              ? `${visibleJobs.length} ${visibleJobs.length === 1 ? "tuition" : "tuitions"} found`
+              : ""}
+          </p>
+          <div className="ml-auto flex flex-wrap items-center gap-2">
+            {query ? (
+              <Button variant="ghost" size="sm" onClick={clearFilters}>
+                Clear search
+              </Button>
+            ) : null}
+            <select
+              aria-label="Sort tuitions"
+              value={filters.sort}
+              onChange={(event) => updateFilter("sort", event.target.value)}
+              className={cn(tuitionSelectClass, "w-auto max-w-full")}
+            >
+              {tuitionSortOptions.map(([value, label]) => (
+                <option key={value} value={value}>
+                  {label}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+      </section>
 
       {loading ? (
         <div className="mt-5 grid gap-4 md:grid-cols-2">
@@ -153,8 +245,21 @@ export function TuitionBrowser({ role }: { role?: string }) {
           ))}
         </div>
       ) : error ? (
-        <div className="mt-5 rounded-2xl border border-destructive/20 bg-destructive/5 p-5 text-sm text-destructive">
-          {error}
+        <div className="mt-5 rounded-2xl border border-destructive/20 bg-destructive/5 p-5 text-sm">
+          <p role="alert" className="text-destructive">
+            {error}
+          </p>
+          <Button
+            variant="outline"
+            size="sm"
+            className="mt-3"
+            onClick={() => {
+              setLoading(true)
+              void loadJobs()
+            }}
+          >
+            Try again
+          </Button>
         </div>
       ) : visibleJobs.length ? (
         <div className="mt-5 grid gap-4 md:grid-cols-2">
@@ -162,15 +267,20 @@ export function TuitionBrowser({ role }: { role?: string }) {
             <TuitionCard
               key={job._id}
               job={job}
+              browseQuery={query}
               onChanged={() => void loadJobs()}
             />
           ))}
         </div>
       ) : (
         <div className="mt-5 rounded-2xl border border-border bg-card p-8 text-center">
-          <p className="font-bold">No tuitions found</p>
+          <p className="font-bold">
+            {jobs.length ? "No matching tuitions" : "No tuitions available yet"}
+          </p>
           <p className="mt-1 text-sm text-muted-foreground">
-            Try another search or category.
+            {jobs.length
+              ? "Try a different keyword or broaden your filters."
+              : "Check back for new listings."}
           </p>
         </div>
       )}

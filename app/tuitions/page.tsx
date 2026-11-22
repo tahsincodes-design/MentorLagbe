@@ -1,5 +1,7 @@
 "use client"
 
+import { Suspense } from "react"
+
 import { TuitionBrowser } from "@/components/tuitions/browse/tuition-browser"
 import { TuitionSidebar } from "@/components/tuitions/shared/tuition-sidebar"
 import { useSession } from "@/lib/auth-client"
@@ -23,7 +25,9 @@ export default function TuitionsPage() {
         image={user?.image}
         role={role}
       />
-      <TuitionBrowser key={user?.id ?? "guest"} role={role} />
+      <Suspense fallback={<main aria-busy="true" className="flex-1" />}>
+        <TuitionBrowser key={user?.id ?? "guest"} role={role} />
+      </Suspense>
     </div>
   )
 }

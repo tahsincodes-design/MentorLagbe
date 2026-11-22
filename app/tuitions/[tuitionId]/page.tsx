@@ -9,19 +9,31 @@ import { approvalLabels, type JobDetails } from "@/lib/tuitions/types"
 import { Badge } from "@/components/ui/badge"
 import { readJobDetails } from "@/lib/jobs-proxy"
 import { tuitionBrowsePath } from "@/lib/tuitions/routes"
+import { readTuitionSearch, tuitionSearchQuery } from "@/lib/tuitions/search"
 
 export default async function TuitionDetailsPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ tuitionId: string }>
+  searchParams: Promise<Record<string, string | string[] | undefined>>
 }) {
   const { tuitionId } = await params
+  const query = await searchParams
+  const browseQuery = tuitionSearchQuery(
+    readTuitionSearch({
+      get(key) {
+        const value = query[key]
+        return typeof value === "string" ? value : (value?.[0] ?? null)
+      },
+    })
+  )
   const response = await readJobDetails(tuitionId, await headers())
   if (response.status === 404) notFound()
 
   const backLink = (
     <Link
-      href={tuitionBrowsePath}
+      href={tuitionBrowsePath + browseQuery}
       className="inline-flex items-center gap-2 text-sm font-semibold text-muted-foreground hover:text-foreground"
     >
       <ArrowLeft className="size-4" />
@@ -51,7 +63,11 @@ export default async function TuitionDetailsPage({
   const closed = !job.isActive || job.approvalStatus !== "approved"
   const facts = [
     { label: "Subject", value: job.subject || "Unspecified", icon: BookOpen },
-    { label: "Location", value: job.location || "Online", icon: MapPin },
+    {
+      label: "Location",
+      value: job.location?.trim() || "Not listed",
+      icon: MapPin,
+    },
     {
       label: "Monthly fee",
       value:
@@ -110,6 +126,7 @@ export default async function TuitionDetailsPage({
         ) : (
           <TuitionApplications
             jobId={job._id}
+            browseQuery={browseQuery}
             closed={closed}
             canManage={job.canManage}
             application={application}

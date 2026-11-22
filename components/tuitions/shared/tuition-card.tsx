@@ -31,9 +31,11 @@ const feeFormatter = new Intl.NumberFormat("en-BD")
 export function TuitionCard({
   job,
   onChanged,
+  browseQuery = "",
 }: {
   job: Job
   onChanged: () => void
+  browseQuery?: string
 }) {
   const [editOpen, setEditOpen] = React.useState(false)
   const [deleting, setDeleting] = React.useState(false)
@@ -123,7 +125,9 @@ export function TuitionCard({
                   aria-hidden="true"
                   className="mt-0.5 size-3.5 shrink-0 text-muted-foreground"
                 />
-                <span className="min-w-0">{job.location || "Not listed"}</span>
+                <span className="min-w-0">
+                  {job.location?.trim() || "Not listed"}
+                </span>
               </dd>
             </div>
           </dl>
@@ -136,7 +140,7 @@ export function TuitionCard({
               <span className="min-w-0">{job.postedBy?.name || "Tutor"}</span>
             </span>
             <Link
-              href={tuitionDetailPath(jobId)}
+              href={tuitionDetailPath(jobId) + browseQuery}
               className={cn(
                 buttonVariants({ variant: "outline" }),
                 "h-9 rounded-full px-3"

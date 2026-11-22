@@ -1,4 +1,5 @@
 import { membershipPath } from "@/lib/membership/plans"
+import { readTuitionSearch, tuitionSearchQuery } from "@/lib/tuitions/search"
 
 export const tuitionBrowsePath = "/tuitions"
 export const tuitionManagePath = "/tuitions/manage"
@@ -15,6 +16,9 @@ export function tuitionReturnPath(value: string | null) {
     value === membershipPath
   )
     return value
-  const match = value?.match(/^\/(?:tuitions|jobs\/jobs)\/([a-f\d]{24})$/i)
-  return match ? tuitionDetailPath(match[1]) : "/"
+  const [path, query] = value?.split("?", 2) ?? []
+  const match = path?.match(/^\/(?:tuitions|jobs\/jobs)\/([a-f\d]{24})$/i)
+  if (!match) return "/"
+  const search = readTuitionSearch(new URLSearchParams(query))
+  return tuitionDetailPath(match[1]) + tuitionSearchQuery(search)
 }

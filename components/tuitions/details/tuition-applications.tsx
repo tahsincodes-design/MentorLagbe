@@ -19,12 +19,14 @@ import { myApplicationsPath, tuitionDetailPath } from "@/lib/tuitions/routes"
 
 export function TuitionApplications({
   jobId,
+  browseQuery,
   closed,
   canManage,
   application,
   applicants,
 }: {
   jobId: string
+  browseQuery: string
   closed: boolean
   canManage: boolean
   application: { status: ApplicationStatus } | null
@@ -160,7 +162,7 @@ export function TuitionApplications({
         </p>
       ) : !session ? (
         <Link
-          href={`/login?next=${encodeURIComponent(tuitionDetailPath(jobId))}`}
+          href={`/login?next=${encodeURIComponent(tuitionDetailPath(jobId) + browseQuery)}`}
           className={buttonVariants({ className: "mt-4" })}
         >
           Sign in to apply
