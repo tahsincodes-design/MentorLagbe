@@ -118,13 +118,13 @@ export default function HowItWorksPage() {
               ))}
             </nav>
           </div>
-          <div className="relative min-h-52 md:min-h-full">
+          <div className="relative aspect-video overflow-hidden md:aspect-auto md:min-h-full">
             <Image
-              src="/hero-student.jpg"
-              alt="Student writing in a notebook beside a laptop"
+              src="/study-workspace.jpg"
+              alt="Overhead view of a learner using a laptop at a study desk"
               fill
-              sizes="(max-width: 767px) 100vw, (max-width: 1152px) 45vw, 500px"
-              className="object-cover object-[50%_38%]"
+              sizes="(max-width: 767px) 150vw, (max-width: 1152px) 66vw, 730px"
+              className="origin-top scale-[1.47] object-cover object-top"
             />
           </div>
         </header>

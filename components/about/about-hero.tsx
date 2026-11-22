@@ -37,15 +37,17 @@ export function AboutHero() {
           <ArrowUpRight aria-hidden="true" className="size-4" />
         </Link>
       </div>
-      <div className="relative min-h-56 overflow-hidden bg-brand-sand sm:min-h-80">
-        <Image
-          src="/hero-student.jpg"
-          alt="A learner writing notes beside an open laptop"
-          fill
-          preload
-          sizes="(min-width: 1280px) 510px, (min-width: 1024px) 44vw, 100vw"
-          className="object-cover object-[50%_46%]"
-        />
+      <div className="grid place-items-center bg-[radial-gradient(ellipse_at_center,#164f55_0%,#10243b_75%)] p-4 sm:p-6 lg:p-7">
+        <div className="relative aspect-[3/2] w-full max-w-[500px] overflow-hidden rounded-[1.5rem] shadow-xl ring-1 ring-brand-cream/15">
+          <Image
+            src="/about-student.png"
+            alt="A student writing in a notebook at a desk"
+            fill
+            preload
+            unoptimized
+            className="object-cover object-bottom"
+          />
+        </div>
       </div>
     </section>
   )
