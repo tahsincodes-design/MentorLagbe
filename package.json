@@ -17,6 +17,7 @@
     "better-auth": "^1.7.25",
     "class-variance-authority": "^0.7.1",
     "cn": "^0.5.2",
+    "jose": "^6.2.17",
     "lucide-react": "^1.74.0",
     "mongodb": "^7.9.0",
     "next": "16.4.5",

@@ -9,6 +9,7 @@ import type {
 async function request<T>(path: string, method = "GET", payload?: object) {
   const response = await fetch(path, {
     method,
+    credentials: "same-origin",
     cache: "no-store",
     headers: payload ? { "Content-Type": "application/json" } : undefined,
     body: payload ? JSON.stringify(payload) : undefined,

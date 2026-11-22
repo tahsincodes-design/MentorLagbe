@@ -1,7 +1,17 @@
 import { auth } from "@/lib/auth"
+import {
+  getJobsJwtKey,
+  jobsJwtCookie,
+  jobsJwtReceiptHeader,
+  signJobsRequest,
+  verifyJobsReceipt,
+} from "@/lib/jobs-jwt"
 
 function errorResponse(status: number, message: string) {
-  return Response.json({ success: false, message }, { status })
+  return Response.json(
+    { success: false, message },
+    { status, headers: { "Cache-Control": "private, no-store" } }
+  )
 }
 
 export async function forwardJobs(request: Request, path = "") {
@@ -43,10 +53,14 @@ async function requestJobs(
   ) {
     return errorResponse(404, "The requested job or application was not found.")
   }
-  const secret = process.env.JOBS_API_SECRET?.trim()
-  if (!secret) return errorResponse(503, "The jobs service is not configured.")
+  const key = getJobsJwtKey()
+  if (!key) return errorResponse(503, "The jobs service is not configured.")
 
   const readOnly = method === "GET"
+  const requestSite = requestHeaders.get("sec-fetch-site")
+  if (!readOnly && requestSite && requestSite !== "same-origin") {
+    return errorResponse(403, "Open MentorLagbe to make changes.")
+  }
   try {
     const session = await auth.api.getSession({ headers: requestHeaders })
     if ((!readOnly || applicationHistory) && !session)
@@ -65,12 +79,7 @@ async function requestJobs(
       return errorResponse(403, "Sign in again with your admin access code.")
     }
 
-    const headers = new Headers({
-      Accept: "application/json",
-      "x-jobs-api-secret": secret,
-    })
-    if (session && !adminNeedsCode) headers.set("x-user-id", session.user.id)
-
+    const headers = new Headers({ Accept: "application/json" })
     let body: string | undefined
     if (method !== "GET" && method !== "DELETE") {
       const data = await readBody?.().catch(() => null)
@@ -86,17 +95,51 @@ async function requestJobs(
       process.env.NEXT_PUBLIC_BASE_API_URL?.trim() ||
       "http://localhost:5000"
     ).replace(/\/+$/, "")
-    const response = await fetch(
-      `${baseUrl}/jobs${path}${dashboard ? "?view=manage" : ""}`,
-      {
-        method,
-        headers,
-        body,
-        cache: "no-store",
-        redirect: "error",
-        signal: AbortSignal.timeout(10_000),
-      }
-    )
+    const resource = `/jobs${path}${dashboard ? "?view=manage" : ""}`
+    const url = new URL(baseUrl + resource)
+    if (
+      url.protocol !== "https:" &&
+      (url.protocol !== "http:" ||
+        !["localhost", "127.0.0.1", "[::1]"].includes(url.hostname))
+    ) {
+      return errorResponse(
+        503,
+        "The jobs service connection is not configured."
+      )
+    }
+
+    const { token, requestId } = await signJobsRequest({
+      key,
+      method,
+      resource,
+      user:
+        session && !adminNeedsCode
+          ? {
+              id: session.user.id,
+              role: (session.user.role ?? "student").toLowerCase(),
+              adminVerified: session.session.adminCodeVerified === true,
+            }
+          : undefined,
+    })
+    headers.set("Cookie", `${jobsJwtCookie}=${token}`)
+    const response = await fetch(url, {
+      method,
+      headers,
+      body,
+      cache: "no-store",
+      redirect: "error",
+      signal: AbortSignal.timeout(10_000),
+    })
+    if (
+      !(await verifyJobsReceipt(
+        response.headers.get(jobsJwtReceiptHeader),
+        requestId,
+        key
+      ))
+    ) {
+      await response.body?.cancel().catch(() => {})
+      return errorResponse(502, "Could not verify the jobs service response.")
+    }
     const data = await response.json().catch(() => null)
     if (!data) {
       return errorResponse(
