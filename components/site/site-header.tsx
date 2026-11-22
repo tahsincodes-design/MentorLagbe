@@ -22,7 +22,9 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { signOut, useSession } from "@/lib/auth-client"
 import {
+  isTuitionDetailPath,
   myApplicationsPath,
+  tuitionApprovalsPath,
   tuitionBrowsePath,
   tuitionManagePath,
 } from "@/lib/tuitions/routes"
@@ -50,7 +52,7 @@ export function SiteHeader() {
     isAdmin || isTutor
       ? {
           label: isAdmin ? "Tuition Approvals" : "My Tuitions",
-          href: tuitionManagePath,
+          href: isAdmin ? tuitionApprovalsPath : tuitionManagePath,
         }
       : user && (user.role ?? "student").toLowerCase() === "student"
         ? { label: "My Applications", href: myApplicationsPath }
@@ -62,9 +64,7 @@ export function SiteHeader() {
   function isActive(href: string) {
     return (
       pathname === href ||
-      (href === tuitionBrowsePath &&
-        pathname !== tuitionManagePath &&
-        pathname.startsWith(`${tuitionBrowsePath}/`))
+      (href === tuitionBrowsePath && isTuitionDetailPath(pathname))
     )
   }
 

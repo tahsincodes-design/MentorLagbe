@@ -22,6 +22,15 @@ export type Job = {
   }
   canManage: boolean
   canModerate: boolean
+  isSaved?: boolean
+  pendingApplications?: number
+  rejectionReason?: string
+}
+
+export type SavedTuition = {
+  tuitionId: string
+  title: string
+  tuition: Job | null
 }
 
 export type JobPayload = {

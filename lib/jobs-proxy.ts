@@ -15,16 +15,19 @@ function errorResponse(status: number, message: string) {
 }
 
 export async function forwardJobs(request: Request, path = "") {
-  const dashboard =
+  const requestedView = new URL(request.url).searchParams.get("view")
+  const view =
     !path &&
     request.method === "GET" &&
-    new URL(request.url).searchParams.get("view") === "manage"
+    (requestedView === "manage" || requestedView === "highest-paid")
+      ? requestedView
+      : undefined
   return requestJobs(
     request.method,
     path,
     request.headers,
     () => request.json(),
-    dashboard
+    view
   )
 }
 
@@ -36,17 +39,23 @@ export function readMyApplications(headers: Headers) {
   return requestJobs("GET", "/applications", headers)
 }
 
+export function readSavedTuitions(headers: Headers) {
+  return requestJobs("GET", "/saved", headers)
+}
+
 async function requestJobs(
   method: string,
   path: string,
   requestHeaders: Headers,
   readBody?: () => Promise<unknown>,
-  dashboard = false
+  view?: "manage" | "highest-paid"
 ) {
   const applicationHistory = path === "/applications"
+  const savedTuitions = /^\/saved(?:\/[a-f\d]{24})?$/i.test(path)
   if (
     path &&
     !applicationHistory &&
+    !savedTuitions &&
     !/^\/[a-f\d]{24}(?:\/approval|\/applications(?:\/[a-f\d]{24})?)?$/i.test(
       path
     )
@@ -57,13 +66,14 @@ async function requestJobs(
   if (!key) return errorResponse(503, "The jobs service is not configured.")
 
   const readOnly = method === "GET"
+  const requiresSession = !readOnly || Boolean(path) || view === "manage"
   const requestSite = requestHeaders.get("sec-fetch-site")
   if (!readOnly && requestSite && requestSite !== "same-origin") {
     return errorResponse(403, "Open MentorLagbe to make changes.")
   }
   try {
     const session = await auth.api.getSession({ headers: requestHeaders })
-    if ((!readOnly || applicationHistory) && !session)
+    if (requiresSession && !session)
       return errorResponse(401, "Please sign in to continue.")
     if (
       applicationHistory &&
@@ -75,8 +85,8 @@ async function requestJobs(
     const adminNeedsCode =
       session?.user.role?.toLowerCase() === "admin" &&
       !session.session.adminCodeVerified
-    if (adminNeedsCode && (!readOnly || dashboard)) {
-      return errorResponse(403, "Sign in again with your admin access code.")
+    if (adminNeedsCode && requiresSession) {
+      return errorResponse(401, "Sign in again with your admin access code.")
     }
 
     const headers = new Headers({ Accept: "application/json" })
@@ -95,7 +105,7 @@ async function requestJobs(
       process.env.NEXT_PUBLIC_BASE_API_URL?.trim() ||
       "http://localhost:5000"
     ).replace(/\/+$/, "")
-    const resource = `/jobs${path}${dashboard ? "?view=manage" : ""}`
+    const resource = `/jobs${path}${view ? `?view=${view}` : ""}`
     const url = new URL(baseUrl + resource)
     if (
       url.protocol !== "https:" &&

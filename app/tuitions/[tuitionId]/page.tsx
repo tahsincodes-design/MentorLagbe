@@ -1,6 +1,6 @@
 import Link from "next/link"
 import { headers } from "next/headers"
-import { notFound } from "next/navigation"
+import { notFound, redirect } from "next/navigation"
 import { ArrowLeft, Banknote, BookOpen, MapPin, UserRound } from "lucide-react"
 
 import { TuitionApplications } from "@/components/tuitions/details/tuition-applications"
@@ -8,7 +8,11 @@ import { TuitionApproval } from "@/components/tuitions/details/tuition-approval"
 import { approvalLabels, type JobDetails } from "@/lib/tuitions/types"
 import { Badge } from "@/components/ui/badge"
 import { readJobDetails } from "@/lib/jobs-proxy"
-import { tuitionBrowsePath } from "@/lib/tuitions/routes"
+import {
+  tuitionBrowsePath,
+  tuitionDetailPath,
+  tuitionSignInPath,
+} from "@/lib/tuitions/routes"
 import { readTuitionSearch, tuitionSearchQuery } from "@/lib/tuitions/search"
 
 export default async function TuitionDetailsPage({
@@ -29,6 +33,10 @@ export default async function TuitionDetailsPage({
     })
   )
   const response = await readJobDetails(tuitionId, await headers())
+  if (response.status === 401) {
+    redirect(tuitionSignInPath(tuitionDetailPath(tuitionId) + browseQuery))
+  }
+  if (response.status === 403) redirect(tuitionBrowsePath)
   if (response.status === 404) notFound()
 
   const backLink = (
@@ -98,6 +106,16 @@ export default async function TuitionDetailsPage({
           <h1 className="mt-3 text-3xl font-extrabold tracking-tight wrap-break-word sm:text-4xl">
             {job.title}
           </h1>
+          {job.rejectionReason ? (
+            <div className="mt-4 rounded-2xl border border-destructive/25 bg-destructive/5 p-4">
+              <p className="text-sm font-semibold text-destructive">
+                Rejection reason
+              </p>
+              <p className="mt-1 text-sm leading-relaxed wrap-anywhere whitespace-pre-wrap">
+                {job.rejectionReason}
+              </p>
+            </div>
+          ) : null}
           <dl className="mt-6 grid gap-4 border-y py-5 sm:grid-cols-2">
             {facts.map(({ label, value, icon: Icon }) => (
               <div key={label} className="flex min-w-0 gap-3">

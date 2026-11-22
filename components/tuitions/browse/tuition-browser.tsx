@@ -25,7 +25,11 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
-import { tuitionBrowsePath, tuitionManagePath } from "@/lib/tuitions/routes"
+import {
+  tuitionApprovalsPath,
+  tuitionBrowsePath,
+  tuitionManagePath,
+} from "@/lib/tuitions/routes"
 import {
   readTuitionSearch,
   searchTuitions,
@@ -152,7 +156,11 @@ export function TuitionBrowser({ role }: { role?: string }) {
         {hasDashboard ? (
           <div className="mt-5 flex flex-wrap gap-2">
             <Link
-              href={tuitionManagePath}
+              href={
+                normalizedRole === "admin"
+                  ? tuitionApprovalsPath
+                  : tuitionManagePath
+              }
               className={buttonVariants({ variant: "outline" })}
             >
               {normalizedRole === "admin" ? "Tuition approvals" : "My tuitions"}

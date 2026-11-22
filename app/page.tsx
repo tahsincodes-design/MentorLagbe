@@ -1,4 +1,5 @@
 import { Hero } from "@/components/home/hero"
+import { HighestPaidTuitions } from "@/components/home/highest-paid-tuitions"
 import { HowItWorks } from "@/components/home/how-it-works"
 import { SiteFooter } from "@/components/site/site-footer"
 
@@ -7,6 +8,7 @@ export default function Page() {
     <>
       <main id="home">
         <Hero />
+        <HighestPaidTuitions />
         <HowItWorks />
       </main>
       <SiteFooter />

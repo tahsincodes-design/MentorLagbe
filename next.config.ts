@@ -12,8 +12,8 @@ const nextConfig: NextConfig = {
       },
       {
         source: "/jobs/add-jobs",
-        destination: "/tuitions/manage",
-        permanent: true,
+        destination: "/tuitions/new",
+        permanent: false,
       },
     ]
   },

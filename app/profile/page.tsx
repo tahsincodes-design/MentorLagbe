@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation"
 import {
   ArrowRight,
   BarChart3,
+  Bookmark,
   CalendarDays,
   Camera,
   CheckCircle2,
@@ -31,7 +32,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { useSession } from "@/lib/auth-client"
 import { membershipPath } from "@/lib/membership/plans"
 import { cn } from "@/lib/utils"
-import { myApplicationsPath, tuitionBrowsePath } from "@/lib/tuitions/routes"
+import {
+  myApplicationsPath,
+  savedTuitionsPath,
+  tuitionBrowsePath,
+} from "@/lib/tuitions/routes"
 
 type AccountStats = {
   totalApplied: number
@@ -58,6 +63,7 @@ const quickActions: {
   tutorOnly?: boolean
 }[] = [
   { label: "Browse Tuitions", href: tuitionBrowsePath, icon: Search },
+  { label: "View Saved Tuitions", href: savedTuitionsPath, icon: Bookmark },
   {
     label: "My Applications",
     href: myApplicationsPath,

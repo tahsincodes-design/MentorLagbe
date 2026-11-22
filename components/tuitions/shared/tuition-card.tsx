@@ -2,12 +2,19 @@
 
 import * as React from "react"
 import Link from "next/link"
-import { ArrowUpRight, MapPin, Pencil, Trash2, UserRound } from "lucide-react"
+import {
+  ArrowUpRight,
+  Inbox,
+  MapPin,
+  Pencil,
+  Trash2,
+  UserRound,
+} from "lucide-react"
 import { toast } from "sonner"
 
 import { deleteJob, setJobStatus } from "@/lib/tuitions/api"
 import { approvalLabels, type Job } from "@/lib/tuitions/types"
-import { tuitionDetailPath } from "@/lib/tuitions/routes"
+import { tuitionBrowsePath, tuitionDetailPath } from "@/lib/tuitions/routes"
 import { EditTuitionDialog } from "@/components/tuitions/manage/edit-tuition-dialog"
 import {
   AlertDialog,
@@ -25,16 +32,19 @@ import { Button, buttonVariants } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Switch } from "@/components/ui/switch"
 import { cn } from "@/lib/utils"
+import { TuitionBookmark } from "@/components/tuitions/shared/tuition-bookmark"
 
 const feeFormatter = new Intl.NumberFormat("en-BD")
 
 export function TuitionCard({
   job,
   onChanged,
+  onBookmarkChange,
   browseQuery = "",
 }: {
   job: Job
   onChanged: () => void
+  onBookmarkChange?: (saved: boolean) => void
   browseQuery?: string
 }) {
   const [editOpen, setEditOpen] = React.useState(false)
@@ -43,6 +53,8 @@ export function TuitionCard({
   const isOpen = job.isActive
   const jobId = job._id
   const busy = deleting || updatingStatus
+  const published = job.approvalStatus === "approved" && job.isActive
+  const pending = job.pendingApplications ?? 0
   const fee =
     typeof job.salary === "number"
       ? feeFormatter.format(job.salary)
@@ -88,24 +100,43 @@ export function TuitionCard({
 
   return (
     <>
-      <Card className="h-full gap-0 rounded-2xl py-0 transition-shadow hover:shadow-md">
+      <Card className="h-full gap-0 rounded-2xl py-0 transition-shadow hover:shadow-md motion-safe:transition-[translate,box-shadow] motion-safe:hover:-translate-y-0.5">
         <CardContent className="flex h-full flex-col p-4 sm:p-5">
-          <div className="flex flex-wrap items-center gap-2">
-            {job.subject ? (
-              <Badge
-                variant="secondary"
-                className="h-auto max-w-full rounded-full wrap-anywhere whitespace-normal"
-              >
-                {job.subject}
-              </Badge>
-            ) : null}
-            {job.canManage || job.canModerate ? (
-              <>
-                <Badge variant="outline">
-                  {approvalLabels[job.approvalStatus]}
+          <div className="flex items-start justify-between gap-2">
+            <div className="flex min-w-0 flex-wrap items-center gap-2">
+              {job.subject ? (
+                <Badge
+                  variant="secondary"
+                  className="h-auto max-w-full rounded-full wrap-anywhere whitespace-normal"
+                >
+                  {job.subject}
                 </Badge>
-                <Badge variant="outline">{isOpen ? "Active" : "Paused"}</Badge>
-              </>
+              ) : null}
+              {job.canManage || job.canModerate ? (
+                <>
+                  <Badge variant="outline">
+                    {approvalLabels[job.approvalStatus]}
+                  </Badge>
+                  <Badge variant="outline">
+                    {isOpen ? "Active" : "Paused"}
+                  </Badge>
+                </>
+              ) : null}
+              {job.canManage && pending > 0 ? (
+                <Badge className="bg-brand-coral/15 text-foreground">
+                  <Inbox aria-hidden="true" className="size-3.5" />
+                  {pending} pending
+                </Badge>
+              ) : null}
+            </div>
+            {published ? (
+              <TuitionBookmark
+                tuitionId={jobId}
+                title={job.title}
+                saved={job.isSaved}
+                returnTo={tuitionBrowsePath + browseQuery}
+                onChange={onBookmarkChange}
+              />
             ) : null}
           </div>
           <h3 className="mt-2 text-lg font-bold tracking-tight wrap-anywhere">
@@ -134,6 +165,14 @@ export function TuitionCard({
           <p className="mt-3 mb-4 line-clamp-2 text-sm leading-5 wrap-anywhere text-muted-foreground">
             {job.description}
           </p>
+          {job.rejectionReason ? (
+            <div className="mb-4 rounded-xl border border-destructive/20 bg-destructive/5 p-3 text-sm">
+              <p className="font-semibold text-destructive">Rejection reason</p>
+              <p className="mt-1 line-clamp-3 wrap-anywhere whitespace-pre-wrap">
+                {job.rejectionReason}
+              </p>
+            </div>
+          ) : null}
           <div className="mt-auto flex flex-wrap items-center justify-between gap-3">
             <span className="inline-flex min-w-0 items-center gap-1.5 text-sm wrap-anywhere text-muted-foreground">
               <UserRound aria-hidden="true" className="size-4 shrink-0" />
@@ -146,7 +185,11 @@ export function TuitionCard({
                 "h-9 rounded-full px-3"
               )}
             >
-              {job.canModerate ? "Review tuition" : "View tuition details"}
+              {job.canModerate
+                ? "Review tuition"
+                : job.canManage && pending > 0
+                  ? "Review applications"
+                  : "View tuition details"}
               <ArrowUpRight aria-hidden="true" className="size-4" />
             </Link>
           </div>

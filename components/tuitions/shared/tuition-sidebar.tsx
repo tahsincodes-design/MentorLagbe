@@ -4,6 +4,7 @@ import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import {
   BriefcaseBusiness,
+  Bookmark,
   ClipboardList,
   LayoutDashboard,
   UserRound,
@@ -14,7 +15,10 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { signOut } from "@/lib/auth-client"
 import { cn } from "@/lib/utils"
 import {
+  isTuitionDetailPath,
   myApplicationsPath,
+  savedTuitionsPath,
+  tuitionApprovalsPath,
   tuitionBrowsePath,
   tuitionManagePath,
 } from "@/lib/tuitions/routes"
@@ -50,7 +54,7 @@ export function TuitionSidebar({
       ? [
           {
             label: isAdmin ? "Tuition approvals" : "My tuitions",
-            href: tuitionManagePath,
+            href: isAdmin ? tuitionApprovalsPath : tuitionManagePath,
             icon: BriefcaseBusiness,
           },
         ]
@@ -64,7 +68,12 @@ export function TuitionSidebar({
           },
         ]
       : []),
-    ...(role ? [{ label: "Profile", href: "/profile", icon: UserRound }] : []),
+    ...(role
+      ? [
+          { label: "Saved tuitions", href: savedTuitionsPath, icon: Bookmark },
+          { label: "Profile", href: "/profile", icon: UserRound },
+        ]
+      : []),
   ]
 
   const initials = (name || email || "ML")
@@ -108,9 +117,7 @@ export function TuitionSidebar({
           const Icon = item.icon
           const active =
             pathname === item.href ||
-            (item.href === tuitionBrowsePath &&
-              pathname !== tuitionManagePath &&
-              pathname.startsWith(`${tuitionBrowsePath}/`))
+            (item.href === tuitionBrowsePath && isTuitionDetailPath(pathname))
 
           return (
             <Link

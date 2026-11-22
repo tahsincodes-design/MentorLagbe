@@ -34,6 +34,19 @@ export async function fetchJobs(view: "browse" | "manage" = "browse") {
   return result.data
 }
 
+export async function fetchHighestPaidTuitions() {
+  const result = await request<{ data: Job[] }>("/api/jobs?view=highest-paid")
+  return result.data
+}
+
+export function setTuitionBookmark(tuitionId: string, saved: boolean) {
+  return request(
+    `/api/jobs/saved/${encodeURIComponent(tuitionId)}`,
+    saved ? "PUT" : "DELETE",
+    saved ? {} : undefined
+  )
+}
+
 export async function createJob(payload: JobPayload) {
   const result = await request<{ data: Job }>("/api/jobs", "POST", payload)
   return result.data
@@ -57,11 +70,13 @@ export function setJobStatus(jobId: string, isActive: boolean) {
 export function reviewTuition(
   jobId: string,
   revision: number,
-  approvalStatus: Exclude<ApprovalStatus, "pending">
+  approvalStatus: Exclude<ApprovalStatus, "pending">,
+  reason?: string
 ) {
   return request(`${jobPath(jobId)}/approval`, "PATCH", {
     approvalStatus,
     revision,
+    reason,
   })
 }
 

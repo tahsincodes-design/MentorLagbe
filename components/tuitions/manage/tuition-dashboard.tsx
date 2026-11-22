@@ -15,13 +15,21 @@ import { CreateTuitionDialog } from "@/components/tuitions/manage/create-tuition
 import { TuitionCard } from "@/components/tuitions/shared/tuition-card"
 import { TuitionMarquee } from "@/components/tuitions/shared/tuition-marquee"
 import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
-export function TuitionDashboard({ role }: { role: string }) {
+export function TuitionDashboard({
+  role,
+  startPosting = false,
+}: {
+  role: string
+  startPosting?: boolean
+}) {
   const [jobs, setJobs] = React.useState<Job[]>([])
   const [membership, setMembership] = React.useState<DashboardMembership>()
   const [loading, setLoading] = React.useState(true)
   const [error, setError] = React.useState("")
-  const [addOpen, setAddOpen] = React.useState(false)
+  const [addOpen, setAddOpen] = React.useState(startPosting)
 
   const loadJobs = React.useCallback(async () => {
     try {
@@ -77,6 +85,27 @@ export function TuitionDashboard({ role }: { role: string }) {
     membership.tuitionCount >= membership.tuitionLimit
   const canPost = isTutor && !loading && !error && !atLimit
   const isAdmin = normalizedRole === "admin"
+  const awaitingReview = isAdmin
+    ? jobs.filter((job) => job.approvalStatus === "pending")
+    : jobs.filter((job) => (job.pendingApplications ?? 0) > 0)
+
+  function renderJobs(list: Job[], emptyMessage: string) {
+    return list.length ? (
+      <div className="mt-3 grid gap-4 motion-safe:animate-in motion-safe:duration-200 motion-safe:fade-in md:grid-cols-2">
+        {list.map((job) => (
+          <TuitionCard
+            key={job._id}
+            job={job}
+            onChanged={() => void loadJobs()}
+          />
+        ))}
+      </div>
+    ) : (
+      <p className="mt-3 rounded-2xl border bg-card p-6 text-center text-sm text-muted-foreground">
+        {emptyMessage}
+      </p>
+    )
+  }
 
   return (
     <main className="min-w-0 flex-1 px-4 py-5 sm:px-6 lg:px-8">
@@ -155,34 +184,39 @@ export function TuitionDashboard({ role }: { role: string }) {
         <div className="mt-5 rounded-2xl border border-destructive/20 bg-destructive/5 p-5 text-sm text-destructive">
           {error}
         </div>
-      ) : jobs.length ? (
-        <div className="mt-5 grid gap-4 md:grid-cols-2">
-          {jobs.map((job) => (
-            <TuitionCard
-              key={job._id}
-              job={job}
-              onChanged={() => void loadJobs()}
-            />
-          ))}
-        </div>
       ) : (
-        <div className="mt-5 rounded-2xl border border-border bg-card p-8 text-center">
-          <p className="font-bold">No tuitions yet</p>
-          {canPost ? (
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => setAddOpen(true)}
-              className="mt-4 rounded-xl"
-            >
-              <Plus className="size-4" />
-              Post your first tuition
-            </Button>
-          ) : null}
-        </div>
+        <Tabs defaultValue={isAdmin ? "pending" : "all"} className="mt-5">
+          <TabsList
+            aria-label={
+              isAdmin ? "Tuition approval filters" : "My tuition filters"
+            }
+            className="h-auto max-w-full flex-wrap justify-start"
+          >
+            <TabsTrigger value="pending" className="h-8 px-2">
+              {isAdmin ? "Pending approval" : "Needs review"}
+              <Badge variant="secondary" className="ml-0.5">
+                {awaitingReview.length}
+              </Badge>
+            </TabsTrigger>
+            <TabsTrigger value="all" className="h-8 px-2">
+              All tuitions
+            </TabsTrigger>
+          </TabsList>
+          <TabsContent value="pending">
+            {renderJobs(
+              awaitingReview,
+              isAdmin
+                ? "No tuitions awaiting approval."
+                : "No student applications awaiting your review."
+            )}
+          </TabsContent>
+          <TabsContent value="all">
+            {renderJobs(jobs, "No tuitions yet.")}
+          </TabsContent>
+        </Tabs>
       )}
 
-      {isTutor ? (
+      {canPost ? (
         <CreateTuitionDialog
           open={addOpen}
           onOpenChange={setAddOpen}

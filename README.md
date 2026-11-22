@@ -14,9 +14,9 @@
 
 | Role | Workflow |
 | --- | --- |
-| **Student** | Browse approved, active tuitions and filter by subject, location, and monthly fee. Open a listing, apply with a short message, and track the decision in **My Applications**. |
-| **Tutor** | Create, edit, pause, or delete listings from **My Tuitions**. Check approval status and accept or decline student applications. |
-| **Admin** | Sign in with the admin access code and review tuition listings before they appear in public search. |
+| **Student** | Browse approved, active tuitions and filter by subject, location, and monthly fee. Bookmark listings in **Saved Tuitions**, apply with a short message, and track the decision in **My Applications**. |
+| **Tutor** | Create, edit, pause, or delete listings from **My Tuitions**. Use **Needs review** to find listings with pending applications and see the reason if an admin declines a listing. |
+| **Admin** | Sign in with the admin access code, review the **Pending approval** queue, and leave a reason when rejecting a listing. |
 
 **Tutor membership** starts with Free, which allows two saved listings. The monthly **MentorLagbe Pro** plan allows unlimited listings and adds dashboard totals for published tuitions and applications. Stripe handles checkout, invoices, payment updates, and cancellation.
 
@@ -26,7 +26,9 @@
 | --- | --- |
 | Browse and filter tuitions | `/tuitions` |
 | Tuition details | `/tuitions/[tuitionId]` |
-| My Tuitions or Tuition Approvals | `/tuitions/manage` |
+| My Tuitions and posting | `/tuitions/manage`, `/tuitions/new` |
+| Tuition Approvals | `/admin/tuitions` |
+| Saved Tuitions | `/tuitions/saved` |
 | My Applications | `/applications` |
 | Tutor membership | `/membership` |
 | How It Works | `/how-it-works` |
