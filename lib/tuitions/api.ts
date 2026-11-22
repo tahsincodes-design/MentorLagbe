@@ -1,3 +1,4 @@
+import type { DashboardMembership } from "@/lib/membership/plans"
 import type {
   ApplicationStatus,
   ApprovalStatus,
@@ -35,6 +36,12 @@ export async function fetchJobs(view: "browse" | "manage" = "browse") {
 export async function createJob(payload: JobPayload) {
   const result = await request<{ data: Job }>("/api/jobs", "POST", payload)
   return result.data
+}
+
+export function fetchTuitionDashboard() {
+  return request<{ data: Job[]; membership?: DashboardMembership }>(
+    "/api/jobs?view=manage"
+  )
 }
 
 export async function updateJob(jobId: string, payload: Partial<JobPayload>) {

@@ -7,12 +7,10 @@ import {
   ClipboardList,
   LayoutDashboard,
   UserRound,
-  Plus,
   LogOut,
 } from "lucide-react"
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Button } from "@/components/ui/button"
 import { signOut } from "@/lib/auth-client"
 import { cn } from "@/lib/utils"
 import {
@@ -27,7 +25,6 @@ type TuitionSidebarProps = {
   email?: string
   image?: string | null
   role?: string
-  openAddJob?: () => void
 }
 
 export function TuitionSidebar({
@@ -35,7 +32,6 @@ export function TuitionSidebar({
   email,
   image,
   role,
-  openAddJob,
 }: TuitionSidebarProps) {
   const pathname = usePathname()
   const router = useRouter()
@@ -133,19 +129,6 @@ export function TuitionSidebar({
           )
         })}
       </nav>
-
-      {isTutor && openAddJob ? (
-        <div className="px-3 pb-3">
-          <Button
-            type="button"
-            onClick={openAddJob}
-            className="w-full rounded-xl bg-brand-coral text-white hover:bg-brand-coral-deep"
-          >
-            <Plus className="size-4" />
-            Post tuition
-          </Button>
-        </div>
-      ) : null}
 
       {role ? (
         <div className="border-t border-brand-cream/10 px-3 pt-3">

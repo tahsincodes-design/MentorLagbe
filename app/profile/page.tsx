@@ -29,6 +29,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button, buttonVariants } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { useSession } from "@/lib/auth-client"
+import { membershipPath } from "@/lib/membership/plans"
 import { cn } from "@/lib/utils"
 import { myApplicationsPath, tuitionBrowsePath } from "@/lib/tuitions/routes"
 
@@ -54,6 +55,7 @@ const quickActions: {
   href: string
   icon: LucideIcon
   studentOnly?: boolean
+  tutorOnly?: boolean
 }[] = [
   { label: "Browse Tuitions", href: tuitionBrowsePath, icon: Search },
   {
@@ -62,7 +64,12 @@ const quickActions: {
     icon: FileText,
     studentOnly: true,
   },
-  { label: "Upgrade to Pro", href: "/#pricing", icon: Crown },
+  {
+    label: "Tutor membership",
+    href: membershipPath,
+    icon: Crown,
+    tutorOnly: true,
+  },
 ]
 
 function getInitials(name: string, email: string) {
@@ -110,7 +117,7 @@ export default function ProfilePage() {
         }
       })
       .catch(() => {
-        if (active) setCurrentPlan("Free")
+        if (active) setCurrentPlan("Unavailable")
       })
 
     return () => {
@@ -264,8 +271,9 @@ export default function ProfilePage() {
                 {quickActions
                   .filter(
                     (action) =>
-                      !action.studentOnly ||
-                      (user.role ?? "student").toLowerCase() === "student"
+                      (!action.studentOnly ||
+                        (user.role ?? "student").toLowerCase() === "student") &&
+                      (!action.tutorOnly || isTutorRole(user.role))
                   )
                   .map((action) => {
                     const Icon = action.icon
@@ -287,29 +295,33 @@ export default function ProfilePage() {
           </div>
 
           <div className="flex flex-col gap-5">
-            <Card className="rounded-3xl">
-              <CardContent className="flex flex-col items-start gap-1 p-5">
-                <p className="flex items-center gap-2 text-xs font-semibold text-muted-foreground">
-                  <Sparkles className="size-4 text-amber-500" />
-                  Plan Status
-                </p>
-                <p className="mt-1 text-xl font-extrabold">
-                  {currentPlan} Plan
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  Upgrade for more benefits
-                </p>
-                <Link
-                  href="/#pricing"
-                  className={cn(
-                    buttonVariants(),
-                    "mt-3 w-full rounded-xl bg-brand-coral text-sm font-semibold text-white hover:bg-brand-coral-deep"
-                  )}
-                >
-                  Upgrade Now
-                </Link>
-              </CardContent>
-            </Card>
+            {isTutorRole(user.role) ? (
+              <Card className="rounded-3xl">
+                <CardContent className="flex flex-col items-start gap-1 p-5">
+                  <p className="flex items-center gap-2 text-xs font-semibold text-muted-foreground">
+                    <Sparkles className="size-4 text-amber-500" />
+                    Plan Status
+                  </p>
+                  <p className="mt-1 text-xl font-extrabold">
+                    {currentPlan} Plan
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    Manage your tutor membership and billing
+                  </p>
+                  <Link
+                    href={membershipPath}
+                    className={cn(
+                      buttonVariants(),
+                      "mt-3 w-full rounded-xl bg-brand-coral text-sm font-semibold text-white hover:bg-brand-coral-deep"
+                    )}
+                  >
+                    {currentPlan === "Pro"
+                      ? "Manage membership"
+                      : "View membership"}
+                  </Link>
+                </CardContent>
+              </Card>
+            ) : null}
 
             <Card className="rounded-3xl">
               <CardContent className="flex flex-col items-start gap-1 p-5">

@@ -1,39 +1,33 @@
 "use client"
 
 import * as React from "react"
+import Link from "next/link"
 import { Plus } from "lucide-react"
 
 import { isTutorRole } from "@/components/auth/roles"
-import { fetchJobs } from "@/lib/tuitions/api"
+import { fetchTuitionDashboard } from "@/lib/tuitions/api"
+import {
+  membershipPath,
+  type DashboardMembership,
+} from "@/lib/membership/plans"
 import type { Job } from "@/lib/tuitions/types"
 import { CreateTuitionDialog } from "@/components/tuitions/manage/create-tuition-dialog"
 import { TuitionCard } from "@/components/tuitions/shared/tuition-card"
 import { TuitionMarquee } from "@/components/tuitions/shared/tuition-marquee"
 import { Button } from "@/components/ui/button"
 
-export function TuitionDashboard({
-  role,
-  openAddJob,
-  onOpenAddJobChange,
-}: {
-  role: string
-  openAddJob?: boolean
-  onOpenAddJobChange?: (open: boolean) => void
-}) {
+export function TuitionDashboard({ role }: { role: string }) {
   const [jobs, setJobs] = React.useState<Job[]>([])
+  const [membership, setMembership] = React.useState<DashboardMembership>()
   const [loading, setLoading] = React.useState(true)
   const [error, setError] = React.useState("")
-  const [internalAddOpen, setInternalAddOpen] = React.useState(false)
-  const addOpen = openAddJob ?? internalAddOpen
-
-  function setAddOpen(open: boolean) {
-    setInternalAddOpen(open)
-    onOpenAddJobChange?.(open)
-  }
+  const [addOpen, setAddOpen] = React.useState(false)
 
   const loadJobs = React.useCallback(async () => {
     try {
-      setJobs(await fetchJobs("manage"))
+      const dashboard = await fetchTuitionDashboard()
+      setJobs(dashboard.data)
+      setMembership(dashboard.membership)
       setError("")
     } catch (loadError) {
       setError(
@@ -51,8 +45,11 @@ export function TuitionDashboard({
 
     async function loadInitialJobs() {
       try {
-        const data = await fetchJobs("manage")
-        if (active) setJobs(data)
+        const dashboard = await fetchTuitionDashboard()
+        if (active) {
+          setJobs(dashboard.data)
+          setMembership(dashboard.membership)
+        }
       } catch (loadError) {
         if (active) {
           setError(
@@ -73,7 +70,12 @@ export function TuitionDashboard({
   }, [])
 
   const normalizedRole = role.toLowerCase()
-  const canPost = isTutorRole(normalizedRole)
+  const isTutor = isTutorRole(normalizedRole)
+  const atLimit =
+    membership &&
+    membership.tuitionLimit !== null &&
+    membership.tuitionCount >= membership.tuitionLimit
+  const canPost = isTutor && !loading && !error && !atLimit
   const isAdmin = normalizedRole === "admin"
 
   return (
@@ -104,6 +106,38 @@ export function TuitionDashboard({
             </Button>
           ) : null}
         </div>
+        {membership ? (
+          <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 border-t pt-4 text-sm">
+            <strong>
+              {membership.plan === "premium" ? "Pro plan" : "Free plan"}
+            </strong>
+            <span className="text-muted-foreground">
+              {membership.tuitionCount}
+              {membership.tuitionLimit === null
+                ? ""
+                : ` of ${membership.tuitionLimit}`}{" "}
+              saved tuitions
+            </span>
+            {membership.insights ? (
+              <span className="text-muted-foreground">
+                {membership.insights.published} published ·{" "}
+                {membership.insights.applications} applications
+              </span>
+            ) : null}
+            <Link
+              href={membershipPath}
+              className="font-semibold underline underline-offset-4"
+            >
+              {membership.plan === "premium" ? "Manage membership" : "View Pro"}
+            </Link>
+            {atLimit ? (
+              <p className="w-full text-muted-foreground">
+                Delete a listing to free a slot, or upgrade for unlimited
+                listings.
+              </p>
+            ) : null}
+          </div>
+        ) : null}
       </section>
 
       {isAdmin ? <TuitionMarquee jobs={jobs} /> : null}
@@ -148,7 +182,7 @@ export function TuitionDashboard({
         </div>
       )}
 
-      {canPost ? (
+      {isTutor ? (
         <CreateTuitionDialog
           open={addOpen}
           onOpenChange={setAddOpen}

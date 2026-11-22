@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 
 import { auth, db } from "@/lib/auth"
+import { getBillingAccount, hasPremium } from "@/lib/membership/store"
 
 export async function GET(request: NextRequest) {
   try {
@@ -21,14 +22,7 @@ export async function GET(request: NextRequest) {
       applications.countDocuments({ studentEmail, status: "accepted" }),
     ])
 
-    // TODO(API): replace "subscriptions" with the actual collection name.
-    // Store subscription documents with fields: userId and plan.
-    const subscription = await db.collection("subscriptions").findOne({
-      userId,
-    })
-
-    const plan =
-      typeof subscription?.plan === "string" ? subscription.plan : "Free"
+    const plan = hasPremium(await getBillingAccount(userId)) ? "Pro" : "Free"
 
     return NextResponse.json({
       stats: {

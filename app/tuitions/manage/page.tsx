@@ -13,7 +13,6 @@ export default function ManageTuitionsPage() {
   const router = useRouter()
   const { data: session, isPending } = useSession()
   const user = session?.user
-  const [open, setOpen] = React.useState(false)
 
   React.useEffect(() => {
     if (isPending) return
@@ -43,13 +42,8 @@ export default function ManageTuitionsPage() {
         email={user.email}
         image={user.image}
         role={role}
-        openAddJob={() => setOpen(true)}
       />
-      <TuitionDashboard
-        role={role}
-        openAddJob={open}
-        onOpenAddJobChange={setOpen}
-      />
+      <TuitionDashboard role={role} />
     </div>
   )
 }
