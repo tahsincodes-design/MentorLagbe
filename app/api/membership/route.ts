@@ -1,5 +1,5 @@
 import { isTutorRole } from "@/components/auth/roles"
-import { auth } from "@/lib/auth"
+import { getAuthSession } from "@/lib/auth"
 import {
   BillingError,
   createMembershipCheckout,
@@ -15,7 +15,7 @@ export async function POST(request: Request) {
   }
 
   try {
-    const session = await auth.api.getSession({ headers: request.headers })
+    const session = await getAuthSession(request.headers)
     if (!session)
       return Response.json(
         { message: "Please sign in first." },

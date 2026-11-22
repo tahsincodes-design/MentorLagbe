@@ -7,7 +7,7 @@ import { isTutorRole } from "@/components/auth/roles"
 import { BillingButton } from "@/components/membership/billing-button"
 import { SiteFooter } from "@/components/site/site-footer"
 import { buttonVariants } from "@/components/ui/button"
-import { auth } from "@/lib/auth"
+import { getAuthSession } from "@/lib/auth"
 import { freeTuitionLimit, membershipPath } from "@/lib/membership/plans"
 import {
   getBillingAccount,
@@ -35,7 +35,7 @@ export default async function MembershipPage({
   }>
 }) {
   const params = await searchParams
-  const session = await auth.api.getSession({ headers: await headers() })
+  const session = await getAuthSession(await headers())
   const tutor =
     session?.user && isTutorRole(session.user.role) ? session.user : null
   const stripePrice = getProPrice().catch(() => null)

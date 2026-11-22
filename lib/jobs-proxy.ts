@@ -1,4 +1,4 @@
-import { auth } from "@/lib/auth"
+import { getAuthSession } from "@/lib/auth"
 import {
   getJobsJwtKey,
   jobsJwtCookie,
@@ -72,7 +72,7 @@ async function requestJobs(
     return errorResponse(403, "Open MentorLagbe to make changes.")
   }
   try {
-    const session = await auth.api.getSession({ headers: requestHeaders })
+    const session = await getAuthSession(requestHeaders)
     if (requiresSession && !session)
       return errorResponse(401, "Please sign in to continue.")
     if (
