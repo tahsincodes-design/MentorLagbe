@@ -23,11 +23,9 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { signOut, useSession } from "@/lib/auth-client"
 import {
+  dashboardPath,
   isTuitionDetailPath,
-  myApplicationsPath,
-  tuitionApprovalsPath,
   tuitionBrowsePath,
-  tuitionManagePath,
 } from "@/lib/tuitions/routes"
 import { cn } from "@/lib/utils"
 
@@ -47,19 +45,9 @@ export function SiteHeader() {
   const [menuOpen, setMenuOpen] = React.useState(false)
   const { data: session } = useSession()
   const user = session?.user
-  const isAdmin = user?.role?.toLowerCase() === "admin"
   const isTutor = isTutorRole(user?.role)
-  const roleLink =
-    isAdmin || isTutor
-      ? {
-          label: isAdmin ? "Tuition Approvals" : "My Tuitions",
-          href: isAdmin ? tuitionApprovalsPath : tuitionManagePath,
-        }
-      : user && (user.role ?? "student").toLowerCase() === "student"
-        ? { label: "My Applications", href: myApplicationsPath }
-        : null
-  const navigation = roleLink
-    ? [...publicNavigation, roleLink]
+  const navigation = user
+    ? [...publicNavigation, { label: "Dashboard", href: dashboardPath }]
     : publicNavigation
 
   function isActive(href: string) {

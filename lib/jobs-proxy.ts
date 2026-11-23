@@ -56,6 +56,7 @@ async function requestJobs(
     path &&
     !applicationHistory &&
     !savedTuitions &&
+    path !== "/analytics" &&
     !/^\/[a-f\d]{24}(?:\/approval|\/applications(?:\/[a-f\d]{24})?)?$/i.test(
       path
     )

@@ -1,4 +1,5 @@
 import type { DashboardMembership } from "@/lib/membership/plans"
+import type { DashboardAnalytics } from "@/lib/tuitions/analytics"
 import type {
   ApplicationStatus,
   ApprovalStatus,
@@ -6,11 +7,17 @@ import type {
   JobPayload,
 } from "@/lib/tuitions/types"
 
-async function request<T>(path: string, method = "GET", payload?: object) {
+async function request<T>(
+  path: string,
+  method = "GET",
+  payload?: object,
+  signal?: AbortSignal
+) {
   const response = await fetch(path, {
     method,
     credentials: "same-origin",
     cache: "no-store",
+    signal,
     headers: payload ? { "Content-Type": "application/json" } : undefined,
     body: payload ? JSON.stringify(payload) : undefined,
   })
@@ -27,15 +34,33 @@ function jobPath(jobId: string) {
   return `/api/jobs/${encodeURIComponent(jobId)}`
 }
 
-export async function fetchJobs(view: "browse" | "manage" = "browse") {
+export async function fetchJobs(signal?: AbortSignal) {
   const result = await request<{ data: Job[] }>(
-    view === "manage" ? "/api/jobs?view=manage" : "/api/jobs"
+    "/api/jobs",
+    "GET",
+    undefined,
+    signal
   )
   return result.data
 }
 
-export async function fetchHighestPaidTuitions() {
-  const result = await request<{ data: Job[] }>("/api/jobs?view=highest-paid")
+export async function fetchHighestPaidTuitions(signal?: AbortSignal) {
+  const result = await request<{ data: Job[] }>(
+    "/api/jobs?view=highest-paid",
+    "GET",
+    undefined,
+    signal
+  )
+  return result.data
+}
+
+export async function fetchDashboardAnalytics(signal: AbortSignal) {
+  const result = await request<{ data: DashboardAnalytics }>(
+    "/api/jobs/analytics",
+    "GET",
+    undefined,
+    signal
+  )
   return result.data
 }
 

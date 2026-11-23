@@ -1,7 +1,6 @@
 "use client"
 
 import * as React from "react"
-import Link from "next/link"
 import {
   ArrowUpRight,
   Inbox,
@@ -12,6 +11,7 @@ import {
 } from "lucide-react"
 import { toast } from "sonner"
 
+import { SiteNavigationLink } from "@/components/site/site-navigation-link"
 import { deleteJob, setJobStatus } from "@/lib/tuitions/api"
 import { approvalLabels, type Job } from "@/lib/tuitions/types"
 import { tuitionBrowsePath, tuitionDetailPath } from "@/lib/tuitions/routes"
@@ -178,7 +178,7 @@ export function TuitionCard({
               <UserRound aria-hidden="true" className="size-4 shrink-0" />
               <span className="min-w-0">{job.postedBy?.name || "Tutor"}</span>
             </span>
-            <Link
+            <SiteNavigationLink
               href={tuitionDetailPath(jobId) + browseQuery}
               className={cn(
                 buttonVariants({ variant: "outline" }),
@@ -194,7 +194,7 @@ export function TuitionCard({
                 aria-hidden="true"
                 className="size-4 motion-safe:transition-transform motion-safe:group-hover/details:translate-x-0.5 motion-safe:group-hover/details:-translate-y-0.5"
               />
-            </Link>
+            </SiteNavigationLink>
           </div>
 
           {job.canManage ? (

@@ -6,6 +6,7 @@ import { useSearchParams } from "next/navigation"
 import { Search, SlidersHorizontal } from "lucide-react"
 
 import { isTutorRole } from "@/components/auth/roles"
+import { TuitionCardsSkeleton } from "@/components/site/page-skeleton"
 import {
   TuitionFilters,
   tuitionSelectClass,
@@ -14,6 +15,7 @@ import { fetchJobs } from "@/lib/tuitions/api"
 import type { Job } from "@/lib/tuitions/types"
 import { TuitionCard } from "@/components/tuitions/shared/tuition-card"
 import { TuitionMarquee } from "@/components/tuitions/shared/tuition-marquee"
+import { useRefreshListingsOnAccountChange } from "@/components/tuitions/shared/use-refresh-listings"
 import { Button, buttonVariants } from "@/components/ui/button"
 import {
   Dialog,
@@ -60,10 +62,11 @@ function replaceSearch(query: string) {
   window.dispatchEvent(new Event(searchChangedEvent))
 }
 
-export function TuitionBrowser({ role }: { role?: string }) {
+export function TuitionBrowser() {
   const [jobs, setJobs] = React.useState<Job[]>([])
   const [loading, setLoading] = React.useState(true)
   const [error, setError] = React.useState("")
+  const [attempt, setAttempt] = React.useState(0)
   const routeSearch = useSearchParams()
   const locationSearch = React.useSyncExternalStore(
     subscribeToSearch,
@@ -84,30 +87,27 @@ export function TuitionBrowser({ role }: { role?: string }) {
     replaceSearch("")
   }
 
-  const loadJobs = React.useCallback(async () => {
-    try {
-      setJobs(await fetchJobs())
-      setError("")
-    } catch (loadError) {
-      setError(
-        loadError instanceof Error
-          ? loadError.message
-          : "Could not load tuitions."
-      )
-    } finally {
-      setLoading(false)
-    }
+  const reloadJobs = React.useCallback(() => {
+    setAttempt((value) => value + 1)
   }, [])
+  const reloadForAccount = React.useCallback(() => {
+    setJobs([])
+    setLoading(true)
+    reloadJobs()
+  }, [reloadJobs])
+  const user = useRefreshListingsOnAccountChange(reloadForAccount)
 
   React.useEffect(() => {
-    let active = true
+    const controller = new AbortController()
 
-    async function loadInitialJobs() {
+    async function loadJobs() {
       try {
-        const data = await fetchJobs()
-        if (active) setJobs(data)
+        const data = await fetchJobs(controller.signal)
+        if (controller.signal.aborted) return
+        setJobs(data)
+        setError("")
       } catch (loadError) {
-        if (active) {
+        if (!controller.signal.aborted) {
           setError(
             loadError instanceof Error
               ? loadError.message
@@ -115,17 +115,17 @@ export function TuitionBrowser({ role }: { role?: string }) {
           )
         }
       } finally {
-        if (active) setLoading(false)
+        if (!controller.signal.aborted) setLoading(false)
       }
     }
 
-    void loadInitialJobs()
-    return () => {
-      active = false
-    }
-  }, [])
+    void loadJobs()
+    return () => controller.abort()
+  }, [attempt])
 
-  const normalizedRole = role?.toLowerCase()
+  const normalizedRole = user
+    ? (user.role ?? "student").toLowerCase()
+    : undefined
   const showMarquee = normalizedRole === "student" || normalizedRole === "admin"
   const hasDashboard = isTutorRole(normalizedRole) || normalizedRole === "admin"
   const visibleJobs = searchTuitions(jobs, filters)
@@ -244,13 +244,8 @@ export function TuitionBrowser({ role }: { role?: string }) {
       </section>
 
       {loading ? (
-        <div className="mt-5 grid gap-4 md:grid-cols-2">
-          {[1, 2, 3, 4].map((item) => (
-            <div
-              key={item}
-              className="h-44 animate-pulse rounded-2xl bg-muted"
-            />
-          ))}
+        <div className="mt-5">
+          <TuitionCardsSkeleton />
         </div>
       ) : error ? (
         <div className="mt-5 rounded-2xl border border-destructive/20 bg-destructive/5 p-5 text-sm">
@@ -263,7 +258,7 @@ export function TuitionBrowser({ role }: { role?: string }) {
             className="mt-3"
             onClick={() => {
               setLoading(true)
-              void loadJobs()
+              reloadJobs()
             }}
           >
             Try again
@@ -276,7 +271,7 @@ export function TuitionBrowser({ role }: { role?: string }) {
               key={job._id}
               job={job}
               browseQuery={query}
-              onChanged={() => void loadJobs()}
+              onChanged={reloadJobs}
             />
           ))}
         </div>

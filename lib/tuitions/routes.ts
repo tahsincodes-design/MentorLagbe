@@ -7,6 +7,7 @@ export const tuitionNewPath = "/tuitions/new"
 export const tuitionApprovalsPath = "/admin/tuitions"
 export const savedTuitionsPath = "/tuitions/saved"
 export const myApplicationsPath = "/applications"
+export const dashboardPath = "/dashboard"
 
 export function tuitionDetailPath(tuitionId: string) {
   return `${tuitionBrowsePath}/${encodeURIComponent(tuitionId)}`
@@ -27,6 +28,7 @@ export function tuitionReturnPath(value: string | null) {
     value === tuitionApprovalsPath ||
     value === savedTuitionsPath ||
     value === myApplicationsPath ||
+    value === dashboardPath ||
     value === membershipPath
   )
     return value

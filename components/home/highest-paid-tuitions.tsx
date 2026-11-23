@@ -5,8 +5,8 @@ import Link from "next/link"
 import { ArrowUpRight, Banknote } from "lucide-react"
 
 import { TuitionCard } from "@/components/tuitions/shared/tuition-card"
+import { useRefreshListingsOnAccountChange } from "@/components/tuitions/shared/use-refresh-listings"
 import { Button, buttonVariants } from "@/components/ui/button"
-import { useSession } from "@/lib/auth-client"
 import { homeRefreshEvent } from "@/lib/home-navigation"
 import { fetchHighestPaidTuitions } from "@/lib/tuitions/api"
 import { tuitionBrowsePath } from "@/lib/tuitions/routes"
@@ -14,38 +14,35 @@ import type { Job } from "@/lib/tuitions/types"
 import { cn } from "@/lib/utils"
 
 export function HighestPaidTuitions() {
-  const { data: session } = useSession()
-  const userId = session?.user?.id
-  return <HighestPaidListings key={userId ?? "guest"} />
-}
-
-function HighestPaidListings() {
   const [jobs, setJobs] = useState<Job[] | null>(null)
   const [failed, setFailed] = useState(false)
   const [attempt, setAttempt] = useState(0)
 
   useEffect(() => {
-    let current = true
-    fetchHighestPaidTuitions().then(
+    const controller = new AbortController()
+    fetchHighestPaidTuitions(controller.signal).then(
       (jobs) => {
-        if (current) {
+        if (!controller.signal.aborted) {
           setJobs(jobs)
           setFailed(false)
         }
       },
       () => {
-        if (current) setFailed(true)
+        if (!controller.signal.aborted) setFailed(true)
       }
     )
-    return () => {
-      current = false
-    }
+    return () => controller.abort()
   }, [attempt])
 
   const reload = useCallback(() => {
     setFailed(false)
     setAttempt((count) => count + 1)
   }, [])
+  const reloadForAccount = useCallback(() => {
+    setJobs(null)
+    reload()
+  }, [reload])
+  useRefreshListingsOnAccountChange(reloadForAccount)
 
   useEffect(() => {
     window.addEventListener(homeRefreshEvent, reload)

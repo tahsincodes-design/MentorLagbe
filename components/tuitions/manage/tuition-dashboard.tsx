@@ -5,6 +5,7 @@ import Link from "next/link"
 import { Plus } from "lucide-react"
 
 import { isTutorRole } from "@/components/auth/roles"
+import { TuitionCardsSkeleton } from "@/components/site/page-skeleton"
 import { fetchTuitionDashboard } from "@/lib/tuitions/api"
 import {
   membershipPath,
@@ -172,13 +173,8 @@ export function TuitionDashboard({
       {isAdmin ? <TuitionMarquee jobs={jobs} /> : null}
 
       {loading ? (
-        <div className="mt-5 grid gap-4 md:grid-cols-2">
-          {[1, 2].map((item) => (
-            <div
-              key={item}
-              className="h-44 animate-pulse rounded-2xl bg-muted"
-            />
-          ))}
+        <div className="mt-5">
+          <TuitionCardsSkeleton />
         </div>
       ) : error ? (
         <div className="mt-5 rounded-2xl border border-destructive/20 bg-destructive/5 p-5 text-sm text-destructive">

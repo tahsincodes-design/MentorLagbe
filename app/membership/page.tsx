@@ -34,11 +34,13 @@ export default async function MembershipPage({
     billing?: string
   }>
 }) {
-  const params = await searchParams
-  const session = await getAuthSession(await headers())
+  const stripePrice = getProPrice().catch(() => null)
+  const [params, session] = await Promise.all([
+    searchParams,
+    headers().then(getAuthSession),
+  ])
   const tutor =
     session?.user && isTutorRole(session.user.role) ? session.user : null
-  const stripePrice = getProPrice().catch(() => null)
   let account = tutor ? await getBillingAccount(tutor.id) : undefined
   let notice: string | undefined
   if (
