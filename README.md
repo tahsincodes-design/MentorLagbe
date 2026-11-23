@@ -74,6 +74,8 @@ Generate independent values for `BETTER_AUTH_SECRET` and `JWT_SECRET` by running
 node -e "console.log(require('node:crypto').randomBytes(32).toString('hex'))"
 ```
 
+To grant admin access, set the existing user's `role` to `"admin"` in MongoDB's `mentor-lagbe.user` collection. Have them sign in again using the **Admin** option and `ADMIN_ACCESS_CODE`.
+
 Keep both `.env` files out of Git. Configure the optional services when you need them.
 
 | Feature | Configuration |

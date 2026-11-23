@@ -58,13 +58,16 @@ function createAuth() {
       before: createAuthMiddleware(async (context) => {
         if (context.path !== "/sign-up/email") return
         const role = context.body?.role ?? "student"
-        if (role !== "student" && role !== "mentor" && role !== "admin") {
+        if (role === "admin") {
+          throw new APIError("FORBIDDEN", {
+            message: "An administrator must assign this role.",
+          })
+        }
+        if (role !== "student" && role !== "mentor") {
           throw new APIError("BAD_REQUEST", {
             message: "Choose a valid account role.",
           })
         }
-        if (role === "admin")
-          requireAdminCode(context.headers?.get("x-admin-code"))
       }),
     },
     databaseHooks: {

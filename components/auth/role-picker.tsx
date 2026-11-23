@@ -2,19 +2,21 @@
 
 import { Check } from "lucide-react"
 
-import { roles, type UserRole } from "@/components/auth/roles"
+import { roles, type RegistrationRole } from "@/components/auth/roles"
 import { cn } from "@/lib/utils"
+
+const registrationRoles = roles.filter((role) => role.value !== "admin")
 
 export function RolePicker({
   value,
   onChange,
 }: {
-  value: UserRole
-  onChange: (role: UserRole) => void
+  value: RegistrationRole
+  onChange: (role: RegistrationRole) => void
 }) {
   return (
-    <div className="grid grid-cols-3 gap-2">
-      {roles.map((role) => {
+    <div className="grid grid-cols-2 gap-2">
+      {registrationRoles.map((role) => {
         const Icon = role.icon
         const selected = value === role.value
 

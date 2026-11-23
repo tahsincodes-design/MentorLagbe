@@ -5,19 +5,15 @@ import {
   type LucideIcon,
 } from "lucide-react"
 
-export type UserRole = "student" | "mentor" | "admin"
+export type RegistrationRole = "student" | "mentor"
+export type UserRole = RegistrationRole | "admin"
 
 export function isTutorRole(role?: string | null) {
   const normalized = role?.toLowerCase()
   return normalized === "mentor" || normalized === "tutor"
 }
 
-export const roles: {
-  value: UserRole
-  label: string
-  description: string
-  icon: LucideIcon
-}[] = [
+export const roles = [
   {
     value: "student",
     label: "Student",
@@ -36,4 +32,9 @@ export const roles: {
     description: "Manage platform & users",
     icon: ShieldCheck,
   },
-]
+] as const satisfies readonly {
+  value: UserRole
+  label: string
+  description: string
+  icon: LucideIcon
+}[]

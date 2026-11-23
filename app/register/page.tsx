@@ -19,7 +19,7 @@ import {
 import { AuthShell } from "@/components/auth/auth-shell"
 import { ImageDropzone } from "@/components/auth/image-dropzone"
 import { RolePicker } from "@/components/auth/role-picker"
-import { type UserRole } from "@/components/auth/roles"
+import type { RegistrationRole } from "@/components/auth/roles"
 import { SiteFooter } from "@/components/site/site-footer"
 import { Button } from "@/components/ui/button"
 import {
@@ -35,8 +35,7 @@ import { signUp } from "@/lib/auth-client"
 
 export default function RegisterPage() {
   const router = useRouter()
-  const [role, setRole] = React.useState<UserRole>("student")
-  const [adminCode, setAdminCode] = React.useState("")
+  const [role, setRole] = React.useState<RegistrationRole>("student")
   const [name, setName] = React.useState("")
   const [email, setEmail] = React.useState("")
   const [password, setPassword] = React.useState("")
@@ -57,10 +56,6 @@ export default function RegisterPage() {
         password,
         image: image || undefined,
         role,
-        fetchOptions:
-          role === "admin"
-            ? { headers: { "x-admin-code": adminCode.trim() } }
-            : undefined,
       })
       if (result.error) {
         setError(result.error.message ?? "Could not create your account.")
@@ -180,20 +175,6 @@ export default function RegisterPage() {
                   </button>
                 </div>
               </div>
-
-              {role === "admin" ? (
-                <div className="space-y-1.5">
-                  <Label htmlFor="register-admin-code">Admin access code</Label>
-                  <Input
-                    id="register-admin-code"
-                    type="password"
-                    autoComplete="off"
-                    value={adminCode}
-                    onChange={(event) => setAdminCode(event.target.value)}
-                    required
-                  />
-                </div>
-              ) : null}
 
               <div className="flex flex-col gap-1.5">
                 <p className="text-xs font-semibold text-muted-foreground">
